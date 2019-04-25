@@ -6,7 +6,7 @@
 package WSN_DS;
 
 import inteligenciacomputacional.Resultado;
-import inteligenciacomputacional.SolucaoCICIDS2017;
+import inteligenciacomputacional.SolucaoCICIDS2017_deprecated;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -27,9 +27,10 @@ public class GraspWSN {
     private final int maxNoImprovement = 10; // iteracoes sem melhorias consecutivas
 //    private final int featuresDisponiveis = 20;
     private static int NUM_FEATURES = 5;
-    private SolucaoCICIDS2017 bestGlobal;
+    private SolucaoWSN bestGlobal;
 
-    public SolucaoCICIDS2017 runGrasp(int[] rcl, int tamanhoSelecao, String name, int iteracoes) throws Exception {
+    
+    public SolucaoWSN runGrasp(int[] rcl, int tamanhoSelecao, String name, int iteracoes, int LS) throws Exception {
         NUM_FEATURES = tamanhoSelecao;
         maxIterations = iteracoes;
         int iteration = 0;
@@ -39,14 +40,14 @@ public class GraspWSN {
         ArrayList<Integer> RCL = buildCustomRCL(rcl);
 
         // Solução Inicial Factível
-        SolucaoCICIDS2017 initialSolution = buildSolucaoInicial(RCL);
+        SolucaoWSN initialSolution = buildSolucaoInicial(RCL);
         initialSolution = avaliar(initialSolution);
         bestGlobal = initialSolution.newClone();
         System.out.println("%%%% solucaoInicial: " + bestGlobal.getAcuracia());
         System.out.println("%%%% bestGlobal: " + bestGlobal.getAcuracia());
 
         /* Gera uma solução vizinha igual ou melhor */
-        initialSolution = buscaLocal(initialSolution);
+        initialSolution = buscaLocal(initialSolution, LS);
         if (initialSolution.isBest(bestGlobal)) {
             bestGlobal = initialSolution.newClone();
         }
@@ -59,7 +60,7 @@ public class GraspWSN {
             iteration = ++iteration;
             System.out.println("############# ITERATION (" + iteration + ") #############");
 
-            SolucaoCICIDS2017 reconstructedSoluction = initialSolution.reconstruirNewSolucao(NUM_FEATURES);
+            SolucaoWSN reconstructedSoluction = initialSolution.reconstruirNewSolucao(NUM_FEATURES);
 
             // Avalia Solução
             avaliar(reconstructedSoluction);
@@ -67,7 +68,7 @@ public class GraspWSN {
             System.out.println("%%%% bestGlobal: " + bestGlobal.getAcuracia());
 
             // Busca por Ótimo Local
-            reconstructedSoluction = buscaLocal(reconstructedSoluction);
+            reconstructedSoluction = buscaLocal(reconstructedSoluction, LS);
             System.out.println("%%%% melhorVizinha: " + reconstructedSoluction.getAcuracia());
             System.out.println("%%%% bestGlobal: " + bestGlobal.getAcuracia());
 
@@ -104,9 +105,9 @@ public class GraspWSN {
         return candidates;
     }
 
-    private SolucaoCICIDS2017 buildSolucaoInicial(ArrayList<Integer> RCL) {
+    private SolucaoWSN buildSolucaoInicial(ArrayList<Integer> RCL) {
         /* Seleciona as features das primeiras N posicoes como solução inicial*/
-        SolucaoCICIDS2017 solution = new SolucaoCICIDS2017();
+        SolucaoWSN solution = new SolucaoWSN();
         while (solution.getFeaturesSelecionadas().size() < NUM_FEATURES) {
             solution.setAcuracia(0);
             solution.addFeature(RCL.remove(0));
@@ -123,17 +124,29 @@ public class GraspWSN {
         return solution;
     }
 
-    private SolucaoCICIDS2017 buscaLocal(SolucaoCICIDS2017 solution) throws Exception {
-        SolucaoCICIDS2017 solutionMutada = solution.bitFlipNewSolution();
+    private SolucaoWSN buscaLocal(SolucaoWSN solution, int neighborhoodStructure) throws Exception {
+        SolucaoWSN solutionMutada = null;
+        switch (neighborhoodStructure) {
+            case 0:
+                solutionMutada = solution.bitFlipNewSolution();
+                break;
+            case 1:
+                solutionMutada = solution.IWSSNewSolution();
+                break;
+            case 2:
+                solutionMutada = solution.IWSSrNewSolution();
+                break;
+        };
+
 //        System.out.println("Solucao: " + solution.getFeaturesSelecionadas() + " (" + solution.getAcuracia() + ")");
 //        System.out.println("solucaoMutada" + solutionMutada.getFeaturesSelecionadas() + " (" + solutionMutada.getAcuracia() + ")");
         System.out.println("%%%% bestGlobal: " + bestGlobal.getAcuracia());
         System.out.println("%%%% bestLocal: " + solution.getAcuracia());
         System.out.println("%%%% garota: " + solutionMutada.getAcuracia());
 
-        if (solutionMutada.isBest(solution)) {
+        if (solutionMutada.isReallyBest(solution)) {
             System.out.println("%%%% GEROU MELHOR ");
-            return buscaLocal(solutionMutada);
+            return buscaLocal(solutionMutada, neighborhoodStructure);
         } else {
 //            System.out.println("Melhor da iteração: " + solution.getFeaturesSelecionadas() + " (" + solution.getAcuracia() + ")");
             System.out.println("%%%% PAROU POR AQUI " + solution.getAcuracia());
@@ -167,7 +180,7 @@ public class GraspWSN {
         arq.close();
     }
 
-    private static SolucaoCICIDS2017 avaliar(SolucaoCICIDS2017 solution) throws Exception {
+    private static SolucaoWSN avaliar(SolucaoWSN solution) throws Exception {
         Resultado desempenho = ValidacaoWSN.executar(solution.getArrayFeaturesSelecionadas());
         solution.setAcuracia(desempenho.getAcuracia());
         try {

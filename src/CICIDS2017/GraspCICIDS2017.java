@@ -6,7 +6,6 @@
 package CICIDS2017;
 
 import inteligenciacomputacional.Resultado;
-import inteligenciacomputacional.SolucaoCICIDS2017;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -193,36 +192,6 @@ public class GraspCICIDS2017 {
         return solution;
     }
 
-    private class VNS {
-
-        public SolucaoCICIDS2017 run(SolucaoCICIDS2017 x, int kmax, long tmax) {
-            long t = System.currentTimeMillis();
-            do {
-                int k = 1;
-                do {
-                    x = shake(); //' ← shake(x, k) /* Shaking */;
-                    SolucaoCICIDS2017 x_new = bestImprovement(); // bestImprovement(x' );
-                    x = null;//neighbourhoodChange(x, x'', k) /* Change neighbourhood */;
-                } while (k < kmax);
-            } while (t < tmax);
-            return null;
-        }
-
-        /* Local search */
-        private SolucaoCICIDS2017 bestImprovement() {
-            /**
-             * @TODO
-             */
-            return null;
-        }
-
-        /* Local search */
-        private SolucaoCICIDS2017 shake() {
-            /**
-             * @TODO
-             */
-            return null;
-        }
-    }
+    
 
 }

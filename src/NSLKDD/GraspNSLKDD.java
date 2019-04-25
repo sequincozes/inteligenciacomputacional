@@ -6,7 +6,7 @@
 package NSLKDD;
 
 import inteligenciacomputacional.Resultado;
-import inteligenciacomputacional.SolucaoCICIDS2017;
+import inteligenciacomputacional.SolucaoCICIDS2017_deprecated;
 import inteligenciacomputacional.SolucaoNSL;
 import java.io.FileWriter;
 import java.io.IOException;

@@ -17,7 +17,6 @@ import weka.attributeSelection.ReliefFAttributeEval;
 import weka.classifiers.Classifier;
 import weka.classifiers.bayes.NaiveBayes;
 import weka.classifiers.lazy.IBk;
-import weka.classifiers.pmml.producer.AbstractPMMLProducerHelper;
 import weka.classifiers.trees.J48;
 import weka.classifiers.trees.NBTree;
 import weka.classifiers.trees.REPTree;

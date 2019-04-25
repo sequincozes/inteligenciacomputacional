@@ -18,7 +18,6 @@ import inteligenciacomputacional.Resultado;
 import inteligenciacomputacional.Run;
 import inteligenciacomputacional.Util;
 import static inteligenciacomputacional.Apuracao.readDataFile;
-import inteligenciacomputacional.SolucaoCICIDS2017;
 import java.io.BufferedReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -38,7 +37,6 @@ import weka.attributeSelection.ReliefFAttributeEval;
 import weka.classifiers.Classifier;
 import weka.classifiers.bayes.NaiveBayes;
 import weka.classifiers.lazy.IBk;
-import weka.classifiers.pmml.producer.AbstractPMMLProducerHelper;
 import weka.classifiers.trees.J48;
 import weka.classifiers.trees.NBTree;
 import weka.classifiers.trees.REPTree;
@@ -63,12 +61,11 @@ public class ValidacaoWSN {
 //    private static final String TRAIN_FILE = "treino_binario.csv";
 //    private static final String TEST_FILE = "ataque_binario.csv";
 //    private static final String NORMAL_FILE = "normal.csv";
-
     // WSN_BINARIO
     private static final String TRAIN_FILE = "binario_treino_1.csv";
-    private static final String TEST_FILE = "_ataque_99.csv";
+    private static final String TEST_FILE = "binario_ataque_99.csv";
     private static final String NORMAL_FILE = "binario_normal_99.csv";
-    
+
     // Setup 
     private static final Attack attackTest = new Attack("binario", 34253, 36666, Run.INCLUDE);
     private static final Attack attackBlackhole = new Attack("blackhole", 9045, 9000, Run.INCLUDE);
@@ -121,7 +118,7 @@ public class ValidacaoWSN {
         return instanceBulk;
     }
 
-    static int[] OneRCICIDS = new int[]{1, 5, 21, 24, 35};//, 36, 53, 56, 64, 67};
+    static int[] OneRCICIDS = new int[]{18, 4, 13, 3, 6};//, 36, 53, 56, 64, 67};
     static int[] IGCICIDS = new int[]{5, 64, 53, 35, 56};//, 67, 9, 54, 7, 41};
     static int[] GRCICIDS = new int[]{53, 5, 64, 40, 7};//, 70, 9, 54, 41, 42};
     //
@@ -138,15 +135,17 @@ public class ValidacaoWSN {
     static int[] GR5WSN = new int[]{3, 6, 10, 9, 13};
 
     public static void main(String[] args) throws Exception {
-        avaliarESelecionar(10);
-        if (1 == 2) {
-            for (int i = 1; i <= 2; i++) {
+//        avaliarESelecionar(10);
+        int it = 10;
+        int ls = 2;
+        if (1 == 1) {
+            for (int i = 1; i <= 1; i++) {
                 for (ClassifierExtended c : CLASSIFIERS_FOREACH) {
                     CLASSIFIERS[0] = c;
-                    grasp(GR18WSN, 5, c.getClassifierName() + "WSN_RODADA_" + i + "_5F", 100);
+                    grasp(GR18WSN, 5, c.getClassifierName() + "WSN_RODADA_" + i + "_5F", it, ls);
                 }
             }
-        }
+        } else {
 //        executar(new int[]{53,5,40,6,56});// 98.4011 RandomTree (VN: 256614.0 VP: 253587.0 FN: 6641.0 FP: 1649.0)
 //        executar(new int[]{6,64,66,35,5});// 99.1347 KNN (VN: 256760.0 VP: 257245.0 FN: 2983.0 FP: 1503.0)
 //        CLASSIFIERS[0] = eRepTree;
@@ -154,14 +153,14 @@ public class ValidacaoWSN {
 
 //        grasp(GR18WSN, 5, "T2");
 //        computarEGravar();
-
 //        System.out.println("----------------------- GR");
 //        executar(GR5WSN);
 //        System.out.println("----------------------- IG");
 //        executar(IG5WSN);
-//        System.out.println("----------------------- OneR");
+            System.out.println("----------------------- OneR");
+            CLASSIFIERS[0] = eNB;
 //        executar(OneR5WSN);
-
+        }
     }
 
     public static void computarEGravar() throws IOException, Exception {
@@ -236,11 +235,20 @@ public class ValidacaoWSN {
                 );
 
                 a.loadAndFilter(filterParaManter, true);
-                System.out.println("Filtro aplicado: " + filterParaManter.length + " features mantidas.");
+//                System.out.println("Filtro aplicado: " + filterParaManter.length + " features mantidas.");
                 for (ClassifierExtended CLASSIFIERS_AUX : CLASSIFIERS) {
 
-                    ClassifierExtended classifierExtended = CLASSIFIERS_AUX;
-                    Classifier classifier = classifierExtended.getClassifier();
+                    Classifier classifier;
+                    ClassifierExtended classifierExtended;
+                    try {
+                        classifierExtended = CLASSIFIERS_AUX;
+                        classifier = classifierExtended.getClassifier();
+                    } catch (NullPointerException n) {
+//                        System.out.println("NullPointer: Classificador Padrão: " + eNB.getClassifierName());
+                        CLASSIFIERS[0] = eNB;
+                        classifierExtended = CLASSIFIERS[0];
+                        classifier = classifierExtended.getClassifier();
+                    }
 
                     String name = classifierExtended.getClassifierName();
                     if (classifierExtended.isIncludeOnTests()) {
@@ -427,7 +435,7 @@ public class ValidacaoWSN {
     }
 
     public static double calcularOneRAttributeEval(int featureIndice) throws Exception {
-        BufferedReader dataset = readDataFile(DIRETORIO + ATTACKS_TYPES[0].getAttackName() + "\\" + ATTACKS_TYPES[0].getAttackName() + TRAIN_FILE);
+        BufferedReader dataset = readDataFile(TRAIN_FILE);
         Instances instances = new Instances(dataset);
         if (NORMALIZE) {
             instances = mormalizar(instances);
@@ -439,7 +447,7 @@ public class ValidacaoWSN {
     }
 
     public static double calcularReliefF(int featureIndice) throws Exception {
-        BufferedReader dataset = readDataFile(DIRETORIO + ATTACKS_TYPES[0].getAttackName() + "\\" + ATTACKS_TYPES[0].getAttackName() + TRAIN_FILE);
+        BufferedReader dataset = readDataFile(TRAIN_FILE);
         Instances instances = new Instances(dataset);
         if (NORMALIZE) {
             instances = mormalizar(instances);
@@ -455,7 +463,8 @@ public class ValidacaoWSN {
     }
 
     public static double calcularGainRatioAttributeEval(int featureIndice) throws Exception {
-        BufferedReader dataset = readDataFile(DIRETORIO + ATTACKS_TYPES[0].getAttackName() + "\\" + ATTACKS_TYPES[0].getAttackName() + TRAIN_FILE);
+        String location = DIRETORIO + ATTACKS_TYPES[0].getAttackName() + "\\" + ATTACKS_TYPES[0].getAttackName() + TRAIN_FILE;
+        BufferedReader dataset = readDataFile(location);
         Instances instances = new Instances(dataset);
         if (NORMALIZE) {
             instances = mormalizar(instances);
@@ -466,11 +475,11 @@ public class ValidacaoWSN {
         return ase.evaluateAttribute(featureIndice);
     }
 
-    private static void grasp(int[] rcl, int tamanhoSelecao, String nome, int iteracoes) throws Exception, Exception {
-        GraspCICIDS2017 grasp = new GraspCICIDS2017();
+    private static void grasp(int[] rcl, int tamanhoSelecao, String nome, int iteracoes, int ls) throws Exception, Exception {
+        GraspWSN grasp = new GraspWSN();
         System.out.println("* Iniciou ... *");
 
-        SolucaoCICIDS2017 best = grasp.runGrasp(rcl, tamanhoSelecao, nome, iteracoes);
+        SolucaoWSN best = grasp.runGrasp(rcl, tamanhoSelecao, nome, iteracoes, ls);
         System.out.println("*");
         System.out.println("*");
         System.out.println("*");

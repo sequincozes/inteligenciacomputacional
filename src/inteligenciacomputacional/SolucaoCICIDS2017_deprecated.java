@@ -16,7 +16,7 @@ import java.util.logging.Logger;
  *
  * @author sequi
  */
-public class SolucaoCICIDS2017 {
+public class SolucaoCICIDS2017_deprecated {
 
     public final ArrayList<Integer> featuresSelecionadas;
     public final ArrayList<Integer> featuresRCL;
@@ -24,7 +24,7 @@ public class SolucaoCICIDS2017 {
     private double taxa_detecao = 0;
     private double taxa_falsos_positivos = 0;
 
-    public SolucaoCICIDS2017(ArrayList<Integer> featuresSelecionadas, ArrayList<Integer> featuresRCL) {
+    public SolucaoCICIDS2017_deprecated(ArrayList<Integer> featuresSelecionadas, ArrayList<Integer> featuresRCL) {
         this.featuresSelecionadas = featuresSelecionadas;
         this.featuresRCL = featuresRCL;
         try {
@@ -34,16 +34,16 @@ public class SolucaoCICIDS2017 {
             this.taxa_falsos_positivos = res.getTaxaAlarmeFalsos();
 
         } catch (Exception ex) {
-            Logger.getLogger(SolucaoCICIDS2017.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SolucaoCICIDS2017_deprecated.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
-    public SolucaoCICIDS2017() {
+    public SolucaoCICIDS2017_deprecated() {
         this.featuresSelecionadas = new ArrayList<>();
         this.featuresRCL = new ArrayList<>();
     }
 
-    private SolucaoCICIDS2017(ArrayList<Integer> featuresSelecionadasAux, ArrayList<Integer> featuresRCL, double acuracia, double taxaDR, double taxaFR) {
+    private SolucaoCICIDS2017_deprecated(ArrayList<Integer> featuresSelecionadasAux, ArrayList<Integer> featuresRCL, double acuracia, double taxaDR, double taxaFR) {
         this.featuresSelecionadas = featuresSelecionadasAux;
         this.featuresRCL = featuresRCL;
         this.acuracia = acuracia;
@@ -75,7 +75,7 @@ public class SolucaoCICIDS2017 {
         return featuresRCL;
     }
 
-    public boolean isBest(SolucaoCICIDS2017 solucao) {
+    public boolean isBest(SolucaoCICIDS2017_deprecated solucao) {
         return this.getAcuracia() >= solucao.getAcuracia();
     }
 
@@ -94,7 +94,7 @@ public class SolucaoCICIDS2017 {
         System.out.print("} - ");
     }
 
-    public SolucaoCICIDS2017 reconstruirNewSolucao(int num_features) {
+    public SolucaoCICIDS2017_deprecated reconstruirNewSolucao(int num_features) {
         ArrayList<Integer> featuresSelecionadasAux = new ArrayList<>(featuresSelecionadas);
         ArrayList<Integer> featuresRCLAux = new ArrayList<>(featuresRCL);;
 
@@ -115,20 +115,20 @@ public class SolucaoCICIDS2017 {
 //                System.out.println("A feature " + featureSorteada + " JÁ está em " + s.featuresSelecionadas);
             }
         }
-        SolucaoCICIDS2017 newer = new SolucaoCICIDS2017(featuresSelecionadasAux, featuresRCLAux);
+        SolucaoCICIDS2017_deprecated newer = new SolucaoCICIDS2017_deprecated(featuresSelecionadasAux, featuresRCLAux);
         return newer;
     }
 
-    public SolucaoCICIDS2017 newClone() {
+    public SolucaoCICIDS2017_deprecated newClone() {
         ArrayList<Integer> featuresSelecionadasAux = new ArrayList<>(featuresSelecionadas);
         ArrayList<Integer> getBitFlipSolution = new ArrayList<>(featuresRCL);
         double acuracia = getAcuracia();
         double taxaDR = getTaxa_detecao();
         double taxaFR = getTaxa_falsos_positivos();
-        return new SolucaoCICIDS2017(featuresSelecionadasAux, getBitFlipSolution, acuracia, taxaDR, taxaFR);
+        return new SolucaoCICIDS2017_deprecated(featuresSelecionadasAux, getBitFlipSolution, acuracia, taxaDR, taxaFR);
     }
 
-    public SolucaoCICIDS2017 bitFlipNewSolution() {
+    public SolucaoCICIDS2017_deprecated bitFlipNewSolution() {
         ArrayList<Integer> featuresSelecionadasAux = new ArrayList<>(featuresSelecionadas);
         ArrayList<Integer> getBitFlipSolution = new ArrayList<>(featuresRCL);
 
@@ -144,7 +144,7 @@ public class SolucaoCICIDS2017 {
         int entrou = getBitFlipSolution.remove(entraPos);
 
         featuresSelecionadasAux.add(entrou);
-        SolucaoCICIDS2017 newer = new SolucaoCICIDS2017(featuresSelecionadasAux, getBitFlipSolution);
+        SolucaoCICIDS2017_deprecated newer = new SolucaoCICIDS2017_deprecated(featuresSelecionadasAux, getBitFlipSolution);
         return newer;
     }
 

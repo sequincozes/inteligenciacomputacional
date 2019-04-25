@@ -11,6 +11,7 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import weka.classifiers.Classifier;
 import weka.core.Instances;
 
@@ -88,7 +89,8 @@ public class Apuracao {
 //            testNormalInstances = ValidacaoWSN.mormalizar(testNormalInstances);
 
         }
-        System.out.println("Número de atributos: " + (trainInstances.numAttributes() - 1));
+//        System.out.print("[" + (trainInstances.numAttributes() - 1)+" Features] - ");
+        System.out.print(Arrays.toString(filter) + " - ");
         trainInstances.setClassIndex(trainInstances.numAttributes() - 1);
         testAttackInstances.setClassIndex(testAttackInstances.numAttributes() - 1);
         testNormalInstances.setClassIndex(testNormalInstances.numAttributes() - 1);
