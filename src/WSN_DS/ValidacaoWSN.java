@@ -54,13 +54,8 @@ import weka.filters.unsupervised.attribute.Normalize;
 public class ValidacaoWSN {
 
     // File locations
-//    private static final String DIRETORIO = "C:\\Users\\sequi\\Google Drive\\2019\\Datasets\\CICIDS2017\\sexta_full";
     private static final String DIRETORIO = "C:\\Users\\sequi\\Google Drive\\2019\\Datasets\\Datadet WSN\\";
 
-    // CICIDS
-//    private static final String TRAIN_FILE = "treino_binario.csv";
-//    private static final String TEST_FILE = "ataque_binario.csv";
-//    private static final String NORMAL_FILE = "normal.csv";
     // WSN_BINARIO
     private static final String TRAIN_FILE = "binario_treino_1.csv";
     private static final String TEST_FILE = "binario_ataque_99.csv";
@@ -68,14 +63,10 @@ public class ValidacaoWSN {
 
     // Setup 
     private static final Attack attackTest = new Attack("binario", 34253, 36666, Run.INCLUDE);
-    private static final Attack attackBlackhole = new Attack("blackhole", 9045, 9000, Run.INCLUDE);
-    private static final Attack attackFlooding = new Attack("flooding", 2981, 9000, Run.INCLUDE);
-    private static final Attack attackScheduling = new Attack("scheduling", 5974, 9000, Run.INCLUDE);
-    private static final Attack attackGrayhole = new Attack("grayhole", 13136, 9000, Run.INCLUDE);
-//    private static final Attack attackBlackhole = new Attack("blackhole", 10, 10, Run.INCLUDE);
-//    private static final Attack attackFlooding = new Attack("flooding", 10, 10, Run.INCLUDE);
-//    private static final Attack attackScheduling = new Attack("scheduling", 10, 10, Run.INCLUDE);
-//    private static final Attack attackGrayhole = new Attack("grayhole", 10, 10, Run.INCLUDE);
+//    private static final Attack attackBlackhole = new Attack("blackhole", 9045, 9000, Run.INCLUDE);
+//    private static final Attack attackFlooding = new Attack("flooding", 2981, 9000, Run.INCLUDE);
+//    private static final Attack attackScheduling = new Attack("scheduling", 5974, 9000, Run.INCLUDE);
+//    private static final Attack attackGrayhole = new Attack("grayhole", 13136, 9000, Run.INCLUDE);
 
     private static final RandomTree rt = new RandomTree();
     private static final NBTree nbt = new NBTree();
@@ -94,8 +85,8 @@ public class ValidacaoWSN {
     private static final ClassifierExtended eNBT = new ClassifierExtended(true, nbt, "NBTree");
 
     // Run Settings
-    private static final ClassifierExtended[] CLASSIFIERS_FOREACH = {eNBT, eNB, eRT, eKNN, ej48, eRF, eRepTree};
-//    private static final ClassifierExtended[] CLASSIFIERS_FOREACH = {eRF, eRepTree};
+//    private static final ClassifierExtended[] CLASSIFIERS_FOREACH = {eNBT, eNB, eRT, eKNN, ej48, eRF, eRepTree};
+    private static final ClassifierExtended[] CLASSIFIERS_FOREACH = {eNB};
 
     private static final ClassifierExtended[] CLASSIFIERS = new ClassifierExtended[1];
     private static final boolean TEST_NORMALS = true;
@@ -142,7 +133,7 @@ public class ValidacaoWSN {
             for (int i = 1; i <= 1; i++) {
                 for (ClassifierExtended c : CLASSIFIERS_FOREACH) {
                     CLASSIFIERS[0] = c;
-                    grasp(GR18WSN, 5, c.getClassifierName() + "WSN_RODADA_" + i + "_5F", it, ls);
+                    graspVND(GR18WSN, 5, c.getClassifierName() + "WSN_RODADA_" + i + "_5F", it, ls);
                 }
             }
         } else {
@@ -157,8 +148,8 @@ public class ValidacaoWSN {
 //        executar(GR5WSN);
 //        System.out.println("----------------------- IG");
 //        executar(IG5WSN);
-            System.out.println("----------------------- OneR");
-            CLASSIFIERS[0] = eNB;
+//            System.out.println("----------------------- OneR");
+//            CLASSIFIERS[0] = eNB;
 //        executar(OneR5WSN);
         }
     }
@@ -477,9 +468,35 @@ public class ValidacaoWSN {
 
     private static void grasp(int[] rcl, int tamanhoSelecao, String nome, int iteracoes, int ls) throws Exception, Exception {
         GraspWSN grasp = new GraspWSN();
-        System.out.println("* Iniciou ... *");
+        System.out.println("* Iniciou GRASP... *");
 
         SolucaoWSN best = grasp.runGrasp(rcl, tamanhoSelecao, nome, iteracoes, ls);
+        System.out.println("*");
+        System.out.println("*");
+        System.out.println("*");
+        System.out.println("*");
+        System.out.println("Conjunto: " + best.getFeaturesSelecionadas().toString());
+        System.out.println("Acurácia: " + best.getAcuracia());
+    }
+
+    private static void graspVND(int[] rcl, int tamanhoSelecao, String nome, int iteracoes, int ls) throws Exception, Exception {
+        GraspWSN grasp = new GraspWSN();
+        System.out.println("* Iniciou GRASP VND... *");
+
+        SolucaoWSN best = grasp.runGraspVND(rcl, tamanhoSelecao, nome, iteracoes);
+        System.out.println("*");
+        System.out.println("*");
+        System.out.println("*");
+        System.out.println("*");
+        System.out.println("Conjunto: " + best.getFeaturesSelecionadas().toString());
+        System.out.println("Acurácia: " + best.getAcuracia());
+    }
+
+    private static void graspRVND(int[] rcl, int tamanhoSelecao, String nome, int iteracoes) throws Exception, Exception {
+        GraspWSN grasp = new GraspWSN();
+        System.out.println("* Iniciou GRASP RVND... *");
+
+        SolucaoWSN best = grasp.runGraspRVND(rcl, tamanhoSelecao, nome, iteracoes);
         System.out.println("*");
         System.out.println("*");
         System.out.println("*");

@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package CICIDS2017;
+package obsoleto;
 
 import inteligenciacomputacional.SolucaoCICIDS2017_deprecated;
 

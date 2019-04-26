@@ -53,7 +53,16 @@ public class SolucaoWSN {
 
         System.out.print("-- Semente: ");
         SolucaoWSN s = new SolucaoWSN(featuresSelecionadas, featuresRCL);
-        s.IWSSNewSolution();
+        SolucaoWSN s1 = new SolucaoWSN(featuresSelecionadas, featuresRCL);
+        System.out.println("Acurácia: " + s.getAcuracia());
+
+        long tempoi = System.currentTimeMillis();
+        s = s.IWSSNewSolution();
+        long tempo1 = System.currentTimeMillis();
+        s1 = s1.IWSSrNewSolution();
+        System.out.println("Acurácia: " + s.getAcuracia() + " | tempo: " + (tempo1 - tempoi));
+        System.out.println("Acurácia: " + s1.getAcuracia() + " | tempo: " + (System.currentTimeMillis() - tempo1));
+
     }
 
     public SolucaoWSN IWSSrNewSolution() {
@@ -123,8 +132,8 @@ public class SolucaoWSN {
         if (VERBOSE) {
             System.out.println("Melhor geral: " + melhorGeral.getFeaturesSelecionadas() + "|" + melhorGeral.getAcuracia());
         }
-        if (melhorUnExc.getFeaturesSelecionadas().size() < size) {
-            melhorGeral = melhorGeral.IWSSNewSolution();
+        while (melhorUnExc.getFeaturesSelecionadas().size() < size) {
+            melhorUnExc.addFeature(melhorUnExc.featuresRCL.remove(0));
             if (VERBOSE) {
                 System.out.println("Melhor complementada: " + melhorGeral.getFeaturesSelecionadas() + "|" + melhorGeral.getAcuracia());
             }
@@ -291,24 +300,33 @@ public class SolucaoWSN {
         return new SolucaoWSN(featuresSelecionadasAux, getBitFlipSolution, acuracia, taxaDR, taxaFR);
     }
 
-    public SolucaoWSN bitFlipNewSolution() {
+    public SolucaoWSN bitFlipNewSolution(int maxSemMelhoria) {
         ArrayList<Integer> featuresSelecionadasAux = new ArrayList<>(featuresSelecionadas);
         ArrayList<Integer> getBitFlipSolution = new ArrayList<>(featuresRCL);
+        SolucaoWSN bestLocal = this;
+        int itSemMelhoria = 0;
+        while (itSemMelhoria <= maxSemMelhoria) {
+            Random r = new Random();
+            // Movendo feature para RCL
+            int saiPos = r.nextInt(featuresSelecionadasAux.size() - 1);
+            int saiu = featuresSelecionadasAux.remove(saiPos);
 
-        Random r = new Random();
-        // Movendo feature para RCL
-        int saiPos = r.nextInt(featuresSelecionadasAux.size() - 1);
-        int saiu = featuresSelecionadasAux.remove(saiPos);
+            getBitFlipSolution.add(saiu);
 
-        getBitFlipSolution.add(saiu);
+            // Movendo feature para Seleção
+            int entraPos = r.nextInt(getBitFlipSolution.size() - 1);
+            int entrou = getBitFlipSolution.remove(entraPos);
 
-        // Movendo feature para Seleção
-        int entraPos = r.nextInt(getBitFlipSolution.size() - 1);
-        int entrou = getBitFlipSolution.remove(entraPos);
-
-        featuresSelecionadasAux.add(entrou);
-        SolucaoWSN newer = new SolucaoWSN(featuresSelecionadasAux, getBitFlipSolution);
-        return newer;
+            featuresSelecionadasAux.add(entrou);
+            SolucaoWSN newer = new SolucaoWSN(featuresSelecionadasAux, getBitFlipSolution);
+            if (newer.isReallyBest(bestLocal)) {
+                maxSemMelhoria = 0;
+                bestLocal = newer.newClone();
+            } else {
+                itSemMelhoria = itSemMelhoria + 1;
+            }
+        }
+        return bestLocal;
     }
 
     public void addFeature(Integer fature) {

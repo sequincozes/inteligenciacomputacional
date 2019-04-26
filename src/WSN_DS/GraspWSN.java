@@ -23,13 +23,12 @@ import java.util.logging.Logger;
  */
 public class GraspWSN {
 
-    private int maxIterations = 10; // quantidade total de iteracoes
-    private final int maxNoImprovement = 10; // iteracoes sem melhorias consecutivas
+    private int maxIterations = 50; // quantidade total de iteracoes
+    private final int maxNoImprovement = 50; // iteracoes sem melhorias consecutivas
 //    private final int featuresDisponiveis = 20;
     private static int NUM_FEATURES = 5;
     private SolucaoWSN bestGlobal;
 
-    
     public SolucaoWSN runGrasp(int[] rcl, int tamanhoSelecao, String name, int iteracoes, int LS) throws Exception {
         NUM_FEATURES = tamanhoSelecao;
         maxIterations = iteracoes;
@@ -47,7 +46,7 @@ public class GraspWSN {
         System.out.println("%%%% bestGlobal: " + bestGlobal.getAcuracia());
 
         /* Gera uma solução vizinha igual ou melhor */
-        initialSolution = buscaLocal(initialSolution, LS);
+        initialSolution = VND.buscaLocal(initialSolution, LS);
         if (initialSolution.isBest(bestGlobal)) {
             bestGlobal = initialSolution.newClone();
         }
@@ -68,7 +67,127 @@ public class GraspWSN {
             System.out.println("%%%% bestGlobal: " + bestGlobal.getAcuracia());
 
             // Busca por Ótimo Local
-            reconstructedSoluction = buscaLocal(reconstructedSoluction, LS);
+            reconstructedSoluction = VND.buscaLocal(reconstructedSoluction, LS);
+            System.out.println("%%%% melhorVizinha: " + reconstructedSoluction.getAcuracia());
+            System.out.println("%%%% bestGlobal: " + bestGlobal.getAcuracia());
+
+            if (reconstructedSoluction.isBest(bestGlobal)) {
+                bestGlobal = reconstructedSoluction.newClone();
+                System.out.println("%%%% NOVA -> bestGlobal: " + bestGlobal.getAcuracia());
+
+                System.out.print(" > " + String.valueOf(bestGlobal.getAcuracia()).substring(0, 7) + "% - Conjunto = " + bestGlobal.getFeaturesSelecionadas());
+                bestGlobal.printSelection(">");
+                noImprovement = 0;
+            } else {
+                noImprovement = ++noImprovement;
+            }
+            System.out.println("%%%% bestGlobal: " + bestGlobal.getAcuracia());
+
+            System.out.println("######### Fim ITERAÇÂO (" + iteration + ") - Acc:" + String.valueOf(bestGlobal.getAcuracia()).substring(0, 7) + "% - Conjunto = " + (Arrays.toString(bestGlobal.getArrayFeaturesSelecionadas())));// " PROVA: " + ValidacaoCICIDS2017.executar(bestGlobal.getArrayFeaturesSelecionadas()).getAcuracia()));
+            imprimeEGravaIteracao(iteration, name, bestGlobal.getAcuracia(), bestGlobal.getTaxa_detecao(), bestGlobal.getTaxa_falsos_positivos(), (Arrays.toString(bestGlobal.getArrayFeaturesSelecionadas())));
+        }
+        return bestGlobal;
+    }
+
+    public SolucaoWSN runGraspVND(int[] rcl, int tamanhoSelecao, String name, int iteracoes) throws Exception {
+        NUM_FEATURES = tamanhoSelecao;
+        maxIterations = iteracoes;
+        int iteration = 0;
+        int noImprovement = 0;
+
+        /* RCL Baseada no Critério OneR */
+        ArrayList<Integer> RCL = buildCustomRCL(rcl);
+
+        // Solução Inicial Factível
+        SolucaoWSN initialSolution = buildSolucaoInicial(RCL);
+        initialSolution = avaliar(initialSolution);
+        bestGlobal = initialSolution.newClone();
+        System.out.println("%%%% solucaoInicial: " + bestGlobal.getAcuracia());
+        System.out.println("%%%% bestGlobal: " + bestGlobal.getAcuracia());
+
+        /* Gera uma solução vizinha igual ou melhor */
+        initialSolution = VND.doVND(initialSolution);
+        if (initialSolution.isBest(bestGlobal)) {
+            bestGlobal = initialSolution.newClone();
+        }
+        System.out.println("%%%% primeiraVizinha: " + initialSolution.getAcuracia());
+        System.out.println("%%%% bestGlobal: " + bestGlobal.getAcuracia());
+
+        imprimeEGravaCabecalho(name);
+        while (iteration < this.maxIterations && noImprovement < this.maxNoImprovement) {
+            System.out.println("%%%% bestGlobal: " + bestGlobal.getAcuracia());
+            iteration = ++iteration;
+            System.out.println("############# ITERATION (" + iteration + ") #############");
+
+            SolucaoWSN reconstructedSoluction = initialSolution.reconstruirNewSolucao(NUM_FEATURES);
+
+            // Avalia Solução
+            avaliar(reconstructedSoluction);
+            System.out.println("%%%% solucaoReconstruida: " + reconstructedSoluction.getAcuracia());
+            System.out.println("%%%% bestGlobal: " + bestGlobal.getAcuracia());
+
+            // Busca por Ótimo Local
+            reconstructedSoluction = VND.doVND(reconstructedSoluction);
+            System.out.println("%%%% melhorVizinha: " + reconstructedSoluction.getAcuracia());
+            System.out.println("%%%% bestGlobal: " + bestGlobal.getAcuracia());
+
+            if (reconstructedSoluction.isBest(bestGlobal)) {
+                bestGlobal = reconstructedSoluction.newClone();
+                System.out.println("%%%% NOVA -> bestGlobal: " + bestGlobal.getAcuracia());
+
+                System.out.print(" > " + String.valueOf(bestGlobal.getAcuracia()).substring(0, 7) + "% - Conjunto = " + bestGlobal.getFeaturesSelecionadas());
+                bestGlobal.printSelection(">");
+                noImprovement = 0;
+            } else {
+                noImprovement = ++noImprovement;
+            }
+            System.out.println("%%%% bestGlobal: " + bestGlobal.getAcuracia());
+
+            System.out.println("######### Fim ITERAÇÂO (" + iteration + ") - Acc:" + String.valueOf(bestGlobal.getAcuracia()).substring(0, 7) + "% - Conjunto = " + (Arrays.toString(bestGlobal.getArrayFeaturesSelecionadas())));// " PROVA: " + ValidacaoCICIDS2017.executar(bestGlobal.getArrayFeaturesSelecionadas()).getAcuracia()));
+            imprimeEGravaIteracao(iteration, name, bestGlobal.getAcuracia(), bestGlobal.getTaxa_detecao(), bestGlobal.getTaxa_falsos_positivos(), (Arrays.toString(bestGlobal.getArrayFeaturesSelecionadas())));
+        }
+        return bestGlobal;
+    }
+
+    public SolucaoWSN runGraspRVND(int[] rcl, int tamanhoSelecao, String name, int iteracoes) throws Exception {
+        NUM_FEATURES = tamanhoSelecao;
+        maxIterations = iteracoes;
+        int iteration = 0;
+        int noImprovement = 0;
+
+        /* RCL Baseada no Critério OneR */
+        ArrayList<Integer> RCL = buildCustomRCL(rcl);
+
+        // Solução Inicial Factível
+        SolucaoWSN initialSolution = buildSolucaoInicial(RCL);
+        initialSolution = avaliar(initialSolution);
+        bestGlobal = initialSolution.newClone();
+        System.out.println("%%%% solucaoInicial: " + bestGlobal.getAcuracia());
+        System.out.println("%%%% bestGlobal: " + bestGlobal.getAcuracia());
+
+        /* Gera uma solução vizinha igual ou melhor */
+        initialSolution = VND.doRVND(initialSolution);
+        if (initialSolution.isBest(bestGlobal)) {
+            bestGlobal = initialSolution.newClone();
+        }
+        System.out.println("%%%% primeiraVizinha: " + initialSolution.getAcuracia());
+        System.out.println("%%%% bestGlobal: " + bestGlobal.getAcuracia());
+
+        imprimeEGravaCabecalho(name);
+        while (iteration < this.maxIterations && noImprovement < this.maxNoImprovement) {
+            System.out.println("%%%% bestGlobal: " + bestGlobal.getAcuracia());
+            iteration = ++iteration;
+            System.out.println("############# ITERATION (" + iteration + ") #############");
+
+            SolucaoWSN reconstructedSoluction = initialSolution.reconstruirNewSolucao(NUM_FEATURES);
+
+            // Avalia Solução
+            avaliar(reconstructedSoluction);
+            System.out.println("%%%% solucaoReconstruida: " + reconstructedSoluction.getAcuracia());
+            System.out.println("%%%% bestGlobal: " + bestGlobal.getAcuracia());
+
+            // Busca por Ótimo Local
+            reconstructedSoluction = VND.doRVND(reconstructedSoluction);
             System.out.println("%%%% melhorVizinha: " + reconstructedSoluction.getAcuracia());
             System.out.println("%%%% bestGlobal: " + bestGlobal.getAcuracia());
 
@@ -124,37 +243,36 @@ public class GraspWSN {
         return solution;
     }
 
-    private SolucaoWSN buscaLocal(SolucaoWSN solution, int neighborhoodStructure) throws Exception {
-        SolucaoWSN solutionMutada = null;
-        switch (neighborhoodStructure) {
-            case 0:
-                solutionMutada = solution.bitFlipNewSolution();
-                break;
-            case 1:
-                solutionMutada = solution.IWSSNewSolution();
-                break;
-            case 2:
-                solutionMutada = solution.IWSSrNewSolution();
-                break;
-        };
-
-//        System.out.println("Solucao: " + solution.getFeaturesSelecionadas() + " (" + solution.getAcuracia() + ")");
-//        System.out.println("solucaoMutada" + solutionMutada.getFeaturesSelecionadas() + " (" + solutionMutada.getAcuracia() + ")");
-        System.out.println("%%%% bestGlobal: " + bestGlobal.getAcuracia());
-        System.out.println("%%%% bestLocal: " + solution.getAcuracia());
-        System.out.println("%%%% garota: " + solutionMutada.getAcuracia());
-
-        if (solutionMutada.isReallyBest(solution)) {
-            System.out.println("%%%% GEROU MELHOR ");
-            return buscaLocal(solutionMutada, neighborhoodStructure);
-        } else {
-//            System.out.println("Melhor da iteração: " + solution.getFeaturesSelecionadas() + " (" + solution.getAcuracia() + ")");
-            System.out.println("%%%% PAROU POR AQUI " + solution.getAcuracia());
-            return solution;
-        }
-
-    }
-
+//    private SolucaoWSN buscaLocalSimpls(SolucaoWSN solution, int neighborhoodStructure) throws Exception {
+//        SolucaoWSN solutionMutada = null;
+//        switch (neighborhoodStructure) {
+//            case 0:
+//                solutionMutada = solution.bitFlipNewSolution(10);
+//                break;
+//            case 1:
+//                solutionMutada = solution.IWSSNewSolution();
+//                break;
+//            case 2:
+//                solutionMutada = solution.IWSSrNewSolution();
+//                break;
+//        };
+//
+////        System.out.println("Solucao: " + solution.getFeaturesSelecionadas() + " (" + solution.getAcuracia() + ")");
+////        System.out.println("solucaoMutada" + solutionMutada.getFeaturesSelecionadas() + " (" + solutionMutada.getAcuracia() + ")");
+//        System.out.println("%%%% bestGlobal: " + bestGlobal.getAcuracia());
+//        System.out.println("%%%% bestLocal: " + solution.getAcuracia());
+//        System.out.println("%%%% garota: " + solutionMutada.getAcuracia());
+//
+//        if (solutionMutada.isReallyBest(solution)) {
+//            System.out.println("%%%% GEROU MELHOR ");
+//            return buscaLocalSimpls(solutionMutada, neighborhoodStructure);
+//        } else {
+////            System.out.println("Melhor da iteração: " + solution.getFeaturesSelecionadas() + " (" + solution.getAcuracia() + ")");
+//            System.out.println("%%%% PAROU POR AQUI " + solution.getAcuracia());
+//            return solution;
+//        }
+//
+//    }
     private static void imprimeEGravaCabecalho(String nome) throws IOException {
         System.out.print("CLASSIFICADOR" + "	");
         System.out.print("ACURÁCIA" + "	");
