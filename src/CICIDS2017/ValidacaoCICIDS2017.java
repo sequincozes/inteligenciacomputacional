@@ -5,9 +5,6 @@
  */
 package CICIDS2017;
 
-import com.sun.management.OperatingSystemMXBean;
-import com.sun.xml.internal.ws.api.message.saaj.SAAJFactory;
-//import com.vladium.utils.SystemInformation;
 import inteligenciacomputacional.Apuracao;
 import inteligenciacomputacional.Attack;
 import inteligenciacomputacional.ClassifierExtended;
@@ -17,17 +14,6 @@ import inteligenciacomputacional.Run;
 import inteligenciacomputacional.Util;
 import static inteligenciacomputacional.Apuracao.readDataFile;
 import java.io.BufferedReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.lang.management.ManagementFactory;
-import java.lang.management.ThreadMXBean;
-import java.security.AccessControlException;
-import java.util.Scanner;
-import javax.swing.SpringLayout;
-import weka.attributeSelection.ASEvaluation;
-import weka.attributeSelection.BestFirst;
-import weka.attributeSelection.CfsSubsetEval;
 import weka.attributeSelection.GainRatioAttributeEval;
 import weka.attributeSelection.InfoGainAttributeEval;
 import weka.attributeSelection.OneRAttributeEval;
@@ -40,7 +26,6 @@ import weka.classifiers.trees.NBTree;
 import weka.classifiers.trees.REPTree;
 import weka.classifiers.trees.RandomForest;
 import weka.classifiers.trees.RandomTree;
-import weka.core.Instance;
 import weka.core.Instances;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Normalize;
@@ -52,7 +37,9 @@ import weka.filters.unsupervised.attribute.Normalize;
 public class ValidacaoCICIDS2017 {
 
     // File locations
-    private static final String DIRETORIO = "C:\\Users\\sequi\\Google Drive\\2019\\Datasets\\CICIDS2017\\sexta_full";
+//    private static final String DIRETORIO = "C:\\Users\\sequi\\Google Drive\\2019\\Datasets\\CICIDS2017\\sexta_full";
+    private static final String DIRETORIO = "/home/midiacom/datasets/CICIDS2017/";
+    public static final String SEPARATOR = "/";
 
     // CICIDS
     private static final String TRAIN_FILE = "treino_binario.csv";
@@ -109,19 +96,18 @@ public class ValidacaoCICIDS2017 {
     static int[] GRASPRCLCICIDS = new int[]{53, 5, 64, 40, 7, 70, 9, 54, 41, 42, 43, 67, 35, 56, 49, 6, 66, 13, 55, 11};
 
     public static void main(String[] args) throws Exception {
-        avaliarESelecionar(5);
-        if (1 == 0) {
+//        avaliarESelecionar(5);
+        if (1 == 1) {
             for (int i = 1; i <= 2; i++) {
                 for (ClassifierExtended c : CLASSIFIERS_FOREACH) {
                     CLASSIFIERS[0] = c;
-                    grasp(GRASPRCLCICIDS, 5, c.getClassifierName() + "CIDIDS_RODADA_" + i + "_5F", 100);
+                    graspVND(GRASPRCLCICIDS, 5, c.getClassifierName() + "CIDIDS_RODADA_" + i + "_5F", 100);
                 }
             }
         }
 
-        CLASSIFIERS[0] = eNB;
-        executar(OneRCICIDS);
-
+//        CLASSIFIERS[0] = eNB;
+//        executar(OneRCICIDS);
     }
 
     public static Resultado executar(int[] filterParaManter) throws Exception {
@@ -332,7 +318,7 @@ public class ValidacaoCICIDS2017 {
     }
 
     public static double calcularOneRAttributeEval(int featureIndice) throws Exception {
-        BufferedReader dataset = readDataFile(DIRETORIO + ATTACKS_TYPES[0].getAttackName() + "\\" + ATTACKS_TYPES[0].getAttackName() + TRAIN_FILE);
+        BufferedReader dataset = readDataFile(DIRETORIO + ATTACKS_TYPES[0].getAttackName() + SEPARATOR + ATTACKS_TYPES[0].getAttackName() + TRAIN_FILE);
         Instances instances = new Instances(dataset);
         if (NORMALIZE) {
             instances = mormalizar(instances);
@@ -383,4 +369,18 @@ public class ValidacaoCICIDS2017 {
         System.out.println("Conjunto: " + best.getFeaturesSelecionadas().toString());
         System.out.println("Acurácia: " + best.getAcuracia());
     }
+
+    private static void graspVND(int[] rcl, int tamanhoSelecao, String nome, int iteracoes) throws Exception, Exception {
+        GraspCICIDS2017 grasp = new GraspCICIDS2017();
+        System.out.println("* Iniciou GRASP VND... *");
+
+        SolucaoCICIDS2017 best = grasp.runGraspVND(rcl, tamanhoSelecao, nome, iteracoes);
+        System.out.println("*");
+        System.out.println("*");
+        System.out.println("*");
+        System.out.println("*");
+        System.out.println("Conjunto: " + best.getFeaturesSelecionadas().toString());
+        System.out.println("Acurácia: " + best.getAcuracia());
+    }
+
 }

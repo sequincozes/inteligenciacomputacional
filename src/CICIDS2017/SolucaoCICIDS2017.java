@@ -6,9 +6,7 @@
 package CICIDS2017;
 
 import inteligenciacomputacional.*;
-import WSN_DS.ValidacaoWSN;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -24,12 +22,13 @@ public class SolucaoCICIDS2017 {
     private double acuracia = 0;
     private double taxa_detecao = 0;
     private double taxa_falsos_positivos = 0;
+    public boolean VERBOSE = false;
 
     public SolucaoCICIDS2017(ArrayList<Integer> featuresSelecionadas, ArrayList<Integer> featuresRCL) {
         this.featuresSelecionadas = featuresSelecionadas;
         this.featuresRCL = featuresRCL;
         try {
-            Resultado res = ValidacaoWSN.executar(getArrayFeaturesSelecionadas());
+            Resultado res = ValidacaoCICIDS2017.executar(getArrayFeaturesSelecionadas());
             this.acuracia = res.getAcuracia();
             this.taxa_detecao = res.getTaxaDeteccao();
             this.taxa_falsos_positivos = res.getTaxaAlarmeFalsos();
@@ -78,6 +77,10 @@ public class SolucaoCICIDS2017 {
 
     public boolean isBest(SolucaoCICIDS2017 solucao) {
         return this.getAcuracia() >= solucao.getAcuracia();
+    }
+
+    public boolean isReallyBest(SolucaoCICIDS2017 solucao) {
+        return this.getAcuracia() > solucao.getAcuracia();
     }
 
     public void printSelection(String selecaoName) {
@@ -186,6 +189,162 @@ public class SolucaoCICIDS2017 {
 
     public void setTaxa_falsos_positivos(double taxa_falsos_positivos) {
         this.taxa_falsos_positivos = taxa_falsos_positivos;
+    }
+
+    public SolucaoCICIDS2017 IWSSrNewSolution() {
+        int size = this.featuresSelecionadas.size();
+
+        /* União de features na RCL */
+        ArrayList<Integer> rclCompleta = new ArrayList<>();
+        rclCompleta.addAll(featuresSelecionadas);
+        rclCompleta.addAll(featuresRCL);
+
+        ArrayList<Integer> novaSelecao = new ArrayList<>();
+
+        /* Listas Auxiliares */
+        ArrayList<Integer> selecaoExclusao;
+        ArrayList<Integer> rclExclusao;
+
+        // Construindo feature a feature
+        int iterationCont = 0;
+        SolucaoCICIDS2017 melhorUnExc;
+        SolucaoCICIDS2017 melhorGeral = null;
+
+        do {
+            iterationCont = iterationCont + 1;
+
+            /* União */
+            System.out.print("-- União: ");
+            novaSelecao.add(rclCompleta.remove(0));
+            SolucaoCICIDS2017 novaSolucao = new SolucaoCICIDS2017(novaSelecao, rclCompleta);
+
+            /* Tentativa de Exclusão */
+//            boolean uniaoIsBest = true;
+            melhorUnExc = novaSolucao.newClone(); // baseline
+
+            for (int i = 0; i < novaSelecao.size(); i++) {
+                // Parte da União Completa, para cada exclusão (reset)
+                selecaoExclusao = new ArrayList<>(novaSelecao);
+                rclExclusao = new ArrayList<>(rclCompleta);
+
+                // Executa Exclusão (se size > 1)
+                if (selecaoExclusao.size() > 1) {
+                    int f_exc = selecaoExclusao.remove(i);
+                    rclExclusao.add(f_exc);
+//                    System.out.print("---> Exlusão (" + f_exc + "): ");
+                    SolucaoCICIDS2017 exclusao = new SolucaoCICIDS2017(selecaoExclusao, rclExclusao);
+                    if (exclusao.isReallyBest(melhorUnExc)) {
+                        melhorUnExc = exclusao.newClone();
+//                        System.out.println("---[" + f_exc + "]---- [NOVA] Melhor Exclusão: " + "[" + melhorUnExc.getFeaturesSelecionadas().size() + "] = {" + melhorUnExc + "}" + melhorUnExc.getAcuracia());
+                    }
+                } else {
+                    melhorGeral = melhorUnExc.newClone();
+                }
+            }
+            if (VERBOSE) {
+                System.out.println("Melhor Exclusão: {" + melhorUnExc.getFeaturesSelecionadas() + "}" + melhorUnExc.getAcuracia());
+            }
+            // Se nenhuma exclusão superou as exclusões anteriores, restaura para a melhor histórica
+            if (!melhorUnExc.isBest(melhorGeral)) {
+                melhorUnExc = melhorGeral.newClone();
+                if (VERBOSE) {
+                    System.out.println("Restaurou");
+                }
+            } else {
+                novaSelecao = melhorUnExc.getFeaturesSelecionadas();
+                rclCompleta = melhorUnExc.getFeaturesBitFlip(); // RCL
+            }
+        } while ((melhorUnExc.getFeaturesSelecionadas().size() < size) && (iterationCont < (rclCompleta.size() + 1)));
+        if (VERBOSE) {
+            System.out.println("Melhor geral: " + melhorGeral.getFeaturesSelecionadas() + "|" + melhorGeral.getAcuracia());
+        }
+        while (melhorUnExc.getFeaturesSelecionadas().size() < size) {
+            melhorUnExc.addFeature(melhorUnExc.featuresRCL.remove(0));
+            if (VERBOSE) {
+                System.out.println("Melhor complementada: " + melhorGeral.getFeaturesSelecionadas() + "|" + melhorGeral.getAcuracia());
+            }
+        }
+        if (melhorUnExc.isBest(this)) {
+            return melhorUnExc;
+        }
+        if (VERBOSE) {
+            System.out.println("Sem melhorias com IWSS.");
+        }
+        return this;
+    }
+
+    public SolucaoCICIDS2017 IWSSNewSolution() {
+        int size = this.featuresSelecionadas.size();
+        /* União de features na RCL */
+        ArrayList<Integer> rclCompleta = new ArrayList<>();
+        rclCompleta.addAll(featuresSelecionadas);
+        rclCompleta.addAll(featuresRCL);
+
+        ArrayList<Integer> novaSelecao = new ArrayList<>();
+
+        // Construindo feature a feature
+        int iterationCont = 0;
+        SolucaoCICIDS2017 melhorGeral = null;
+
+        do {
+            iterationCont = iterationCont + 1;
+            /* União */
+            if (VERBOSE) {
+                System.out.print("-- União: ");
+            }
+            if (novaSelecao.size() < 1) {
+                novaSelecao.add(rclCompleta.remove(0)); // Raiz
+                melhorGeral = new SolucaoCICIDS2017(novaSelecao, rclCompleta);
+            } else {
+                novaSelecao.add(rclCompleta.remove(0)); // Raiz
+                SolucaoCICIDS2017 tentativaUniao = new SolucaoCICIDS2017(novaSelecao, rclCompleta);
+                if (tentativaUniao.isBest(melhorGeral)) {
+                    melhorGeral = tentativaUniao.newClone();
+                } else {
+                    rclCompleta.add(novaSelecao.remove(novaSelecao.size() - 1)); // Devolve para o final da RCL
+                }
+            }
+
+        } while ((melhorGeral.getFeaturesSelecionadas().size() < size) && (iterationCont < (rclCompleta.size() + 1)));
+        if (VERBOSE) {
+            System.out.println("Melhor geral: " + melhorGeral.getFeaturesSelecionadas() + "|" + melhorGeral.getAcuracia());
+        }
+        if (melhorGeral.isBest(this)) {
+            return melhorGeral;
+        }
+        if (VERBOSE) {
+            System.out.println("Sem melhorias com IWSS.");
+        }
+        return this;
+    }
+
+    public SolucaoCICIDS2017 bitFlipNewSolution(int maxSemMelhoria) {
+        ArrayList<Integer> featuresSelecionadasAux = new ArrayList<>(featuresSelecionadas);
+        ArrayList<Integer> getBitFlipSolution = new ArrayList<>(featuresRCL);
+        SolucaoCICIDS2017 bestLocal = this;
+        int itSemMelhoria = 0;
+        while (itSemMelhoria <= maxSemMelhoria) {
+            Random r = new Random();
+            // Movendo feature para RCL
+            int saiPos = r.nextInt(featuresSelecionadasAux.size() - 1);
+            int saiu = featuresSelecionadasAux.remove(saiPos);
+
+            getBitFlipSolution.add(saiu);
+
+            // Movendo feature para Seleção
+            int entraPos = r.nextInt(getBitFlipSolution.size() - 1);
+            int entrou = getBitFlipSolution.remove(entraPos);
+
+            featuresSelecionadasAux.add(entrou);
+            SolucaoCICIDS2017 newer = new SolucaoCICIDS2017(featuresSelecionadasAux, getBitFlipSolution);
+            if (newer.isReallyBest(bestLocal)) {
+                maxSemMelhoria = 0;
+                bestLocal = newer.newClone();
+            } else {
+                itSemMelhoria = itSemMelhoria + 1;
+            }
+        }
+        return bestLocal;
     }
 
 }

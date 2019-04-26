@@ -5,13 +5,10 @@
  */
 package CICIDS2017;
 
-import static NSLKDD.ValidacaoNSLKDD.calcularGainRatioAttributeEval;
 import static NSLKDD.ValidacaoNSLKDD.mormalizar;
 import static inteligenciacomputacional.Apuracao.readDataFile;
 import inteligenciacomputacional.FeatureAvaliada;
-import inteligenciacomputacional.FeatureAvaliada;
 import inteligenciacomputacional.Util;
-import java.io.BufferedReader;
 import weka.attributeSelection.GainRatioAttributeEval;
 import weka.attributeSelection.InfoGainAttributeEval;
 import weka.attributeSelection.OneRAttributeEval;
