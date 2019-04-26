@@ -6,6 +6,7 @@
 package inteligenciacomputacional;
 
 import CICIDS2017.CpuLoad;
+import WSN_DS.ValidacaoWSN;
 //import CICIDS2017.ValidacaoWSN;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -57,9 +58,9 @@ public class Apuracao {
         this.expectedAttacks = expectedAttacks;
         this.expectedNormals = expectedNormals;
         this.showProgress = showProgress;
-        this.trainFile = diretorio + attackType + "\\" + trainFile;
-        this.normalsFile = diretorio + attackType + "\\" + normalsFile;
-        this.ataquesFile = diretorio + attackType + "\\" + ataquesFile;
+        this.trainFile = diretorio + attackType + ValidacaoWSN.SEPARATOR + trainFile;
+        this.normalsFile = diretorio + attackType + ValidacaoWSN.SEPARATOR + normalsFile;
+        this.ataquesFile = diretorio + attackType + ValidacaoWSN.SEPARATOR + ataquesFile;
         this.features = features;
 
     }

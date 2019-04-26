@@ -7,9 +7,6 @@ package NSLKDD;
 
 import CICIDS2017.CustomFS;
 import CICIDS2017.Output;
-import com.sun.management.OperatingSystemMXBean;
-import com.sun.xml.internal.ws.api.message.saaj.SAAJFactory;
-import com.vladium.utils.SystemInformation;
 import inteligenciacomputacional.Apuracao;
 import inteligenciacomputacional.Attack;
 import inteligenciacomputacional.ClassifierExtended;
@@ -18,20 +15,8 @@ import inteligenciacomputacional.Resultado;
 import inteligenciacomputacional.Run;
 import inteligenciacomputacional.Util;
 import static inteligenciacomputacional.Apuracao.readDataFile;
-import inteligenciacomputacional.SolucaoCICIDS2017_deprecated;
 import inteligenciacomputacional.SolucaoNSL;
 import java.io.BufferedReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.lang.management.ManagementFactory;
-import java.lang.management.ThreadMXBean;
-import java.security.AccessControlException;
-import java.util.Scanner;
-import javax.swing.SpringLayout;
-import weka.attributeSelection.ASEvaluation;
-import weka.attributeSelection.BestFirst;
-import weka.attributeSelection.CfsSubsetEval;
 import weka.attributeSelection.GainRatioAttributeEval;
 import weka.attributeSelection.InfoGainAttributeEval;
 import weka.attributeSelection.OneRAttributeEval;
@@ -44,7 +29,6 @@ import weka.classifiers.trees.NBTree;
 import weka.classifiers.trees.REPTree;
 import weka.classifiers.trees.RandomForest;
 import weka.classifiers.trees.RandomTree;
-import weka.core.Instance;
 import weka.core.Instances;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Normalize;
@@ -57,6 +41,7 @@ public class ValidacaoNSLKDD {
 
     // File locations
     private static final String DIRETORIO = "C:\\Users\\sequi\\Google Drive\\2019\\Datasets\\NSL-KDD\\";
+    
 
     private static final String TRAIN_FILE = "train.txt";
     private static final String TEST_FILE = "test.txt";

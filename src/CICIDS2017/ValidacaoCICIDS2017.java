@@ -7,7 +7,7 @@ package CICIDS2017;
 
 import com.sun.management.OperatingSystemMXBean;
 import com.sun.xml.internal.ws.api.message.saaj.SAAJFactory;
-import com.vladium.utils.SystemInformation;
+//import com.vladium.utils.SystemInformation;
 import inteligenciacomputacional.Apuracao;
 import inteligenciacomputacional.Attack;
 import inteligenciacomputacional.ClassifierExtended;

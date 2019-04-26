@@ -5,11 +5,7 @@
  */
 package WSN_DS;
 
-import CICIDS2017.GraspCICIDS2017;
 import CICIDS2017.Output;
-import com.sun.management.OperatingSystemMXBean;
-import com.sun.xml.internal.ws.api.message.saaj.SAAJFactory;
-import com.vladium.utils.SystemInformation;
 import inteligenciacomputacional.Apuracao;
 import inteligenciacomputacional.Attack;
 import inteligenciacomputacional.ClassifierExtended;
@@ -22,14 +18,6 @@ import java.io.BufferedReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.lang.management.ManagementFactory;
-import java.lang.management.ThreadMXBean;
-import java.security.AccessControlException;
-import java.util.Scanner;
-import javax.swing.SpringLayout;
-import weka.attributeSelection.ASEvaluation;
-import weka.attributeSelection.BestFirst;
-import weka.attributeSelection.CfsSubsetEval;
 import weka.attributeSelection.GainRatioAttributeEval;
 import weka.attributeSelection.InfoGainAttributeEval;
 import weka.attributeSelection.OneRAttributeEval;
@@ -42,7 +30,6 @@ import weka.classifiers.trees.NBTree;
 import weka.classifiers.trees.REPTree;
 import weka.classifiers.trees.RandomForest;
 import weka.classifiers.trees.RandomTree;
-import weka.core.Instance;
 import weka.core.Instances;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Normalize;
@@ -54,7 +41,9 @@ import weka.filters.unsupervised.attribute.Normalize;
 public class ValidacaoWSN {
 
     // File locations
-    private static final String DIRETORIO = "C:\\Users\\sequi\\Google Drive\\2019\\Datasets\\Datadet WSN\\";
+//    private static final String DIRETORIO = "C:\\Users\\sequi\\Google Drive\\2019\\Datasets\\Datadet WSN\\";
+    private static final String DIRETORIO = "/home/silvio/datasets/WSN/";
+    public static final String SEPARATOR = "/";
 
     // WSN_BINARIO
     private static final String TRAIN_FILE = "binario_treino_1.csv";
@@ -85,8 +74,8 @@ public class ValidacaoWSN {
     private static final ClassifierExtended eNBT = new ClassifierExtended(true, nbt, "NBTree");
 
     // Run Settings
-//    private static final ClassifierExtended[] CLASSIFIERS_FOREACH = {eNBT, eNB, eRT, eKNN, ej48, eRF, eRepTree};
-    private static final ClassifierExtended[] CLASSIFIERS_FOREACH = {eNB};
+    private static final ClassifierExtended[] CLASSIFIERS_FOREACH = {eNBT, eRT, eKNN, ej48, eRF, eRepTree}; //eNB
+//    private static final ClassifierExtended[] CLASSIFIERS_FOREACH = {eNB};
 
     private static final ClassifierExtended[] CLASSIFIERS = new ClassifierExtended[1];
     private static final boolean TEST_NORMALS = true;
@@ -127,7 +116,7 @@ public class ValidacaoWSN {
 
     public static void main(String[] args) throws Exception {
 //        avaliarESelecionar(10);
-        int it = 10;
+        int it = 50;
         int ls = 2;
         if (1 == 1) {
             for (int i = 1; i <= 1; i++) {
@@ -152,61 +141,6 @@ public class ValidacaoWSN {
 //            CLASSIFIERS[0] = eNB;
 //        executar(OneR5WSN);
         }
-    }
-
-    public static void computarEGravar() throws IOException, Exception {
-        FileWriter arq = new FileWriter("d:\\resultados.txt", true);
-        PrintWriter gravarArq = new PrintWriter(arq);
-        gravarArq.append("OneR - 5 Features\r\n");
-        arq.close();
-        executar(OneR5WSN);
-
-        arq = new FileWriter("d:\\resultados.txt", true);
-        gravarArq = new PrintWriter(arq);
-        gravarArq.append("IG - 5 Features\r\n");
-        arq.close();
-        executar(IG5WSN);
-
-        arq = new FileWriter("d:\\resultados.txt", true);
-        gravarArq = new PrintWriter(arq);
-        gravarArq.append("GR - 5 Features\r\n");
-        arq.close();
-        executar(GR5WSN);
-
-        arq = new FileWriter("d:\\resultados.txt", true);
-        gravarArq = new PrintWriter(arq);
-        gravarArq.append("OneR - 10 Features\r\n");
-        arq.close();
-        executar(OneR10WSN);
-
-        arq = new FileWriter("d:\\resultados.txt", true);
-        gravarArq = new PrintWriter(arq);
-        gravarArq.append("IG - 10 Features\r\n");
-        arq.close();
-        executar(IG10WSN);
-
-        arq = new FileWriter("d:\\resultados.txt", true);
-        gravarArq = new PrintWriter(arq);
-        gravarArq.append("GR - 10 Features\r\n");
-        arq.close();
-        executar(GR10WSN);
-
-        arq = new FileWriter("d:\\resultados.txt", true);
-        gravarArq = new PrintWriter(arq);
-        gravarArq.append("OneR - 18 Features\r\n");
-        arq.close();
-        executar(OneR18WSN);
-
-        arq = new FileWriter("d:\\resultados.txt", true);
-        gravarArq = new PrintWriter(arq);
-        gravarArq.append("IG - 18 Features\r\n");
-        arq.close();
-        executar(IG18WSN);
-        arq = new FileWriter("d:\\resultados.txt", true);
-        gravarArq = new PrintWriter(arq);
-        gravarArq.append("GR - 18 Features\r\n");
-        arq.close();
-        executar(GR18WSN);
     }
 
     public static Resultado executar(int[] filterParaManter) throws Exception {
@@ -412,7 +346,7 @@ public class ValidacaoWSN {
     }
 
     public static double calcularGI(int featureIndice) throws Exception {
-        String location = DIRETORIO + ATTACKS_TYPES[0].getAttackName() + "\\" + ATTACKS_TYPES[0].getAttackName() + TRAIN_FILE;
+        String location = DIRETORIO + ATTACKS_TYPES[0].getAttackName() + SEPARATOR + ATTACKS_TYPES[0].getAttackName() + TRAIN_FILE;
         BufferedReader dataset = readDataFile(location);
         Instances instances = new Instances(dataset);
         instances.setClassIndex(instances.numAttributes() - 1);
@@ -454,7 +388,7 @@ public class ValidacaoWSN {
     }
 
     public static double calcularGainRatioAttributeEval(int featureIndice) throws Exception {
-        String location = DIRETORIO + ATTACKS_TYPES[0].getAttackName() + "\\" + ATTACKS_TYPES[0].getAttackName() + TRAIN_FILE;
+        String location = DIRETORIO + ATTACKS_TYPES[0].getAttackName() + SEPARATOR + ATTACKS_TYPES[0].getAttackName() + TRAIN_FILE;
         BufferedReader dataset = readDataFile(location);
         Instances instances = new Instances(dataset);
         if (NORMALIZE) {

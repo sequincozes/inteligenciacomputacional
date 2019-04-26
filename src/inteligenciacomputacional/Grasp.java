@@ -16,8 +16,8 @@ import java.util.logging.Logger;
  */
 public class Grasp {
 
-    private final int maxIterations = 10; // quantidade total de iteracoes
-    private final int maxNoImprovement = 1; // iteracoes sem melhorias consecutivas
+    private final int maxIterations = 50; // quantidade total de iteracoes
+    private final int maxNoImprovement = 50; // iteracoes sem melhorias consecutivas
     private final int featuresDisponiveis = 20;
     private final int gerarFeatures = 10;
 
