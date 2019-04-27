@@ -117,12 +117,11 @@ public class ValidacaoWSN {
     public static void main(String[] args) throws Exception {
 //        avaliarESelecionar(10);
         int it = 50;
-        int ls = 2;
         if (1 == 1) {
             for (int i = 1; i <= 1; i++) {
                 for (ClassifierExtended c : CLASSIFIERS_FOREACH) {
                     CLASSIFIERS[0] = c;
-                    graspVND(GR18WSN, 5, c.getClassifierName() + "WSN_RODADA_" + i + "_5F", it, ls);
+                    graspVND(GR18WSN, 5, c.getClassifierName() + "WSN_RODADA_" + i + "_5F", it);
                 }
             }
         } else {
@@ -413,7 +412,7 @@ public class ValidacaoWSN {
         System.out.println("Acurácia: " + best.getAcuracia());
     }
 
-    private static void graspVND(int[] rcl, int tamanhoSelecao, String nome, int iteracoes, int ls) throws Exception, Exception {
+    private static void graspVND(int[] rcl, int tamanhoSelecao, String nome, int iteracoes) throws Exception, Exception {
         GraspWSN grasp = new GraspWSN();
         System.out.println("* Iniciou GRASP VND... *");
 
