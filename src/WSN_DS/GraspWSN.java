@@ -46,7 +46,7 @@ public class GraspWSN {
         System.out.println("%%%% bestGlobal: " + bestGlobal.getAcuracia());
 
         /* Gera uma solução vizinha igual ou melhor */
-        initialSolution = VND.buscaLocal(initialSolution, LS);
+        initialSolution = WSNVND.buscaLocal(initialSolution, LS);
         if (initialSolution.isBest(bestGlobal)) {
             bestGlobal = initialSolution.newClone();
         }
@@ -67,7 +67,7 @@ public class GraspWSN {
             System.out.println("%%%% bestGlobal: " + bestGlobal.getAcuracia());
 
             // Busca por Ótimo Local
-            reconstructedSoluction = VND.buscaLocal(reconstructedSoluction, LS);
+            reconstructedSoluction = WSNVND.buscaLocal(reconstructedSoluction, LS);
             System.out.println("%%%% melhorVizinha: " + reconstructedSoluction.getAcuracia());
             System.out.println("%%%% bestGlobal: " + bestGlobal.getAcuracia());
 
@@ -106,7 +106,7 @@ public class GraspWSN {
         System.out.println("%%%% bestGlobal: " + bestGlobal.getAcuracia());
 
         /* Gera uma solução vizinha igual ou melhor */
-        initialSolution = VND.doVND(initialSolution);
+        initialSolution = WSNVND.doVND(initialSolution);
         if (initialSolution.isBest(bestGlobal)) {
             bestGlobal = initialSolution.newClone();
         }
@@ -127,7 +127,7 @@ public class GraspWSN {
             System.out.println("%%%% bestGlobal: " + bestGlobal.getAcuracia());
 
             // Busca por Ótimo Local
-            reconstructedSoluction = VND.doVND(reconstructedSoluction);
+            reconstructedSoluction = WSNVND.doVND(reconstructedSoluction);
             System.out.println("%%%% melhorVizinha: " + reconstructedSoluction.getAcuracia());
             System.out.println("%%%% bestGlobal: " + bestGlobal.getAcuracia());
 
@@ -166,7 +166,7 @@ public class GraspWSN {
         System.out.println("%%%% bestGlobal: " + bestGlobal.getAcuracia());
 
         /* Gera uma solução vizinha igual ou melhor */
-        initialSolution = VND.doRVND(initialSolution);
+        initialSolution = WSNVND.doRVND(initialSolution);
         if (initialSolution.isBest(bestGlobal)) {
             bestGlobal = initialSolution.newClone();
         }
@@ -187,7 +187,7 @@ public class GraspWSN {
             System.out.println("%%%% bestGlobal: " + bestGlobal.getAcuracia());
 
             // Busca por Ótimo Local
-            reconstructedSoluction = VND.doRVND(reconstructedSoluction);
+            reconstructedSoluction = WSNVND.doRVND(reconstructedSoluction);
             System.out.println("%%%% melhorVizinha: " + reconstructedSoluction.getAcuracia());
             System.out.println("%%%% bestGlobal: " + bestGlobal.getAcuracia());
 

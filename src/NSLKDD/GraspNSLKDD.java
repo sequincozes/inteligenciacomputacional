@@ -6,17 +6,12 @@
 package NSLKDD;
 
 import inteligenciacomputacional.Resultado;
-import inteligenciacomputacional.SolucaoCICIDS2017_deprecated;
 import inteligenciacomputacional.SolucaoNSL;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Random;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -182,4 +177,123 @@ public class GraspNSLKDD {
         return solution;
     }
 
+    public SolucaoNSL runGraspVND(int[] rcl, int tamanhoSelecao, String name, int iteracoes) throws Exception {
+        NUM_FEATURES = tamanhoSelecao;
+        maxIterations = iteracoes;
+        int iteration = 0;
+        int noImprovement = 0;
+
+        /* RCL Baseada no Critério OneR */
+        ArrayList<Integer> RCL = buildCustomRCL(rcl);
+
+        // Solução Inicial Factível
+        SolucaoNSL initialSolution = buildSolucaoInicial(RCL);
+        initialSolution = avaliar(initialSolution);
+        bestGlobal = initialSolution.newClone();
+        System.out.println("%%%% solucaoInicial: " + bestGlobal.getAcuracia());
+        System.out.println("%%%% bestGlobal: " + bestGlobal.getAcuracia());
+
+        /* Gera uma solução vizinha igual ou melhor */
+        initialSolution = NSLVND.doVND(initialSolution);
+        if (initialSolution.isBest(bestGlobal)) {
+            bestGlobal = initialSolution.newClone();
+        }
+        System.out.println("%%%% primeiraVizinha: " + initialSolution.getAcuracia());
+        System.out.println("%%%% bestGlobal: " + bestGlobal.getAcuracia());
+
+        imprimeEGravaCabecalho(name);
+        while (iteration < this.maxIterations && noImprovement < this.maxNoImprovement) {
+            System.out.println("%%%% bestGlobal: " + bestGlobal.getAcuracia());
+            iteration = ++iteration;
+            System.out.println("############# ITERATION (" + iteration + ") #############");
+
+            SolucaoNSL reconstructedSoluction = initialSolution.reconstruirNewSolucao(NUM_FEATURES);
+
+            // Avalia Solução
+            avaliar(reconstructedSoluction);
+            System.out.println("%%%% solucaoReconstruida: " + reconstructedSoluction.getAcuracia());
+            System.out.println("%%%% bestGlobal: " + bestGlobal.getAcuracia());
+
+            // Busca por Ótimo Local
+            reconstructedSoluction = NSLVND.doVND(reconstructedSoluction);
+            System.out.println("%%%% melhorVizinha: " + reconstructedSoluction.getAcuracia());
+            System.out.println("%%%% bestGlobal: " + bestGlobal.getAcuracia());
+
+            if (reconstructedSoluction.isBest(bestGlobal)) {
+                bestGlobal = reconstructedSoluction.newClone();
+                System.out.println("%%%% NOVA -> bestGlobal: " + bestGlobal.getAcuracia());
+
+                System.out.print(" > " + String.valueOf(bestGlobal.getAcuracia()).substring(0, 7) + "% - Conjunto = " + bestGlobal.getFeaturesSelecionadas());
+                bestGlobal.printSelection(">");
+                noImprovement = 0;
+            } else {
+                noImprovement = ++noImprovement;
+            }
+            System.out.println("%%%% bestGlobal: " + bestGlobal.getAcuracia());
+
+            System.out.println("######### Fim ITERAÇÂO (" + iteration + ") - Acc:" + String.valueOf(bestGlobal.getAcuracia()).substring(0, 7) + "% - Conjunto = " + (Arrays.toString(bestGlobal.getArrayFeaturesSelecionadas())));// " PROVA: " + ValidacaoCICIDS2017.executar(bestGlobal.getArrayFeaturesSelecionadas()).getAcuracia()));
+            imprimeEGravaIteracao(iteration, name, bestGlobal.getAcuracia(), bestGlobal.getTaxa_detecao(), bestGlobal.getTaxa_falsos_positivos(), (Arrays.toString(bestGlobal.getArrayFeaturesSelecionadas())));
+        }
+        return bestGlobal;
+    }
+
+    public SolucaoNSL runGraspRVND(int[] rcl, int tamanhoSelecao, String name, int iteracoes) throws Exception {
+        NUM_FEATURES = tamanhoSelecao;
+        maxIterations = iteracoes;
+        int iteration = 0;
+        int noImprovement = 0;
+
+        /* RCL Baseada no Critério OneR */
+        ArrayList<Integer> RCL = buildCustomRCL(rcl);
+
+        // Solução Inicial Factível
+        SolucaoNSL initialSolution = buildSolucaoInicial(RCL);
+        initialSolution = avaliar(initialSolution);
+        bestGlobal = initialSolution.newClone();
+        System.out.println("%%%% solucaoInicial: " + bestGlobal.getAcuracia());
+        System.out.println("%%%% bestGlobal: " + bestGlobal.getAcuracia());
+
+        /* Gera uma solução vizinha igual ou melhor */
+        initialSolution = NSLVND.doRVND(initialSolution);
+        if (initialSolution.isBest(bestGlobal)) {
+            bestGlobal = initialSolution.newClone();
+        }
+        System.out.println("%%%% primeiraVizinha: " + initialSolution.getAcuracia());
+        System.out.println("%%%% bestGlobal: " + bestGlobal.getAcuracia());
+
+        imprimeEGravaCabecalho(name);
+        while (iteration < this.maxIterations && noImprovement < this.maxNoImprovement) {
+            System.out.println("%%%% bestGlobal: " + bestGlobal.getAcuracia());
+            iteration = ++iteration;
+            System.out.println("############# ITERATION (" + iteration + ") #############");
+
+            SolucaoNSL reconstructedSoluction = initialSolution.reconstruirNewSolucao(NUM_FEATURES);
+
+            // Avalia Solução
+            avaliar(reconstructedSoluction);
+            System.out.println("%%%% solucaoReconstruida: " + reconstructedSoluction.getAcuracia());
+            System.out.println("%%%% bestGlobal: " + bestGlobal.getAcuracia());
+
+            // Busca por Ótimo Local
+            reconstructedSoluction = NSLVND.doRVND(reconstructedSoluction);
+            System.out.println("%%%% melhorVizinha: " + reconstructedSoluction.getAcuracia());
+            System.out.println("%%%% bestGlobal: " + bestGlobal.getAcuracia());
+
+            if (reconstructedSoluction.isBest(bestGlobal)) {
+                bestGlobal = reconstructedSoluction.newClone();
+                System.out.println("%%%% NOVA -> bestGlobal: " + bestGlobal.getAcuracia());
+
+                System.out.print(" > " + String.valueOf(bestGlobal.getAcuracia()).substring(0, 7) + "% - Conjunto = " + bestGlobal.getFeaturesSelecionadas());
+                bestGlobal.printSelection(">");
+                noImprovement = 0;
+            } else {
+                noImprovement = ++noImprovement;
+            }
+            System.out.println("%%%% bestGlobal: " + bestGlobal.getAcuracia());
+
+            System.out.println("######### Fim ITERAÇÂO (" + iteration + ") - Acc:" + String.valueOf(bestGlobal.getAcuracia()).substring(0, 7) + "% - Conjunto = " + (Arrays.toString(bestGlobal.getArrayFeaturesSelecionadas())));// " PROVA: " + ValidacaoCICIDS2017.executar(bestGlobal.getArrayFeaturesSelecionadas()).getAcuracia()));
+            imprimeEGravaIteracao(iteration, name, bestGlobal.getAcuracia(), bestGlobal.getTaxa_detecao(), bestGlobal.getTaxa_falsos_positivos(), (Arrays.toString(bestGlobal.getArrayFeaturesSelecionadas())));
+        }
+        return bestGlobal;
+    }
 }

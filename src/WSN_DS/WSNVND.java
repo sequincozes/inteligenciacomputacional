@@ -14,7 +14,7 @@ import java.util.concurrent.ThreadLocalRandom;
  *
  * @author silvio
  */
-public class VND {
+public class WSNVND {
 
     public static SolucaoWSN doVND(SolucaoWSN semente) throws Exception {
         SolucaoWSN melhor = semente.newClone();

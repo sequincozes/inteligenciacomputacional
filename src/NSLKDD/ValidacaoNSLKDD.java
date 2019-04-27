@@ -41,7 +41,6 @@ public class ValidacaoNSLKDD {
 
     // File locations
     private static final String DIRETORIO = "C:\\Users\\sequi\\Google Drive\\2019\\Datasets\\NSL-KDD\\";
-    
 
     private static final String TRAIN_FILE = "train.txt";
     private static final String TEST_FILE = "test.txt";
@@ -91,7 +90,7 @@ public class ValidacaoNSLKDD {
 
     static int[] GR_APP = new int[]{11, 10, 22, 9, 14};
     static int[] IG_APP = new int[]{5, 3, 6, 10, 33};
-    static int[] OneR_APP = new int[]{5, 10, 6, 1, 3}; 
+    static int[] OneR_APP = new int[]{5, 10, 6, 1, 3};
 
     static CustomFS GR_APPc = new CustomFS("GR_APP", GR_APP);
     static CustomFS IG_APPc = new CustomFS("IG_APP", IG_APP);
@@ -101,46 +100,19 @@ public class ValidacaoNSLKDD {
     static int[] rcl = {11, 10, 22, 9, 14, 18, 17, 5, 3, 33, 6, 1, 36, 23, 37, 24, 38, 13, 40, 39};
 
     public static void main(String[] args) throws Exception {
-        // Estáticos
-        if (2 == 1) {
-            for (CustomFS customRCL : selecoes) {
-                System.out.println("RCL: " + customRCL.getName());
-                CLASSIFIERS = CLASSIFIERS_FOREACH;
-                executar(customRCL.getCustomRcl());
-            }
-        }
 
         // GRASP
         if (1 == 1) {
             for (int i = 1; i <= 2; i++) {
                 for (ClassifierExtended c : CLASSIFIERS_FOREACH) {
                     CLASSIFIERS[0] = c;
-                    grasp(rcl, 5, c.getClassifierName() + "_KDD_RODADA_" + i + "_5F_", 100);
+                    graspVND(rcl, 5, c.getClassifierName() + "_KDD_RODADA_" + i + "_5F_", 10);
                 }
             }
         }
-//        executar(new int[]{53,5,40,6,56});// 98.4011 RandomTree (VN: 256614.0 VP: 253587.0 FN: 6641.0 FP: 1649.0)
-//        executar(new int[]{6,64,66,35,5});// 99.1347 KNN (VN: 256760.0 VP: 257245.0 FN: 2983.0 FP: 1503.0)
-//        CLASSIFIERS[0] = eRepTree;
-//        executar(new int[]{64,70,42,53,56}); //(82.1541748046875%)
 
-//        grasp(GR18WSN, 5, "T2");
-//        computarEGravar();
-//        System.out.println("----------------------- GR");
-//        executar(GR5WSN);
-//        System.out.println("----------------------- IG");
-//        executar(IG5WSN);
-//        System.out.println("----------------------- OneR");
-//        executar(OneR5WSN);
     }
 
-//    public static void computarEGravar() throws IOException, Exception {
-//        arq = new FileWriter("d:\\resultados.txt", true);
-//        gravarArq = new PrintWriter(arq);
-//        gravarArq.append("GR - 18 Features\r\n");
-//        arq.close();
-//        executar(GR18WSN);
-//    };
     public static Resultado executar(int[] filterParaManter) throws Exception {
         Resultado resultado = null;
         for (Attack attack : ATTACKS_TYPES) {
@@ -393,6 +365,32 @@ public class ValidacaoNSLKDD {
         System.out.println("* Iniciou ... *");
 
         SolucaoNSL best = grasp.runGrasp(rcl, tamanhoSelecao, nome, iteracoes);
+        System.out.println("*");
+        System.out.println("*");
+        System.out.println("*");
+        System.out.println("*");
+        System.out.println("Conjunto: " + best.getFeaturesSelecionadas().toString());
+        System.out.println("Acurácia: " + best.getAcuracia());
+    }
+
+    private static void graspVND(int[] rcl, int tamanhoSelecao, String nome, int iteracoes) throws Exception, Exception {
+        GraspNSLKDD grasp = new GraspNSLKDD();
+        System.out.println("* Iniciou GRASP VND... *");
+
+        SolucaoNSL best = grasp.runGraspVND(rcl, tamanhoSelecao, nome, iteracoes);
+        System.out.println("*");
+        System.out.println("*");
+        System.out.println("*");
+        System.out.println("*");
+        System.out.println("Conjunto: " + best.getFeaturesSelecionadas().toString());
+        System.out.println("Acurácia: " + best.getAcuracia());
+    }
+
+    private static void graspRVND(int[] rcl, int tamanhoSelecao, String nome, int iteracoes) throws Exception, Exception {
+        GraspNSLKDD grasp = new GraspNSLKDD();
+        System.out.println("* Iniciou GRASP RVND... *");
+
+        SolucaoNSL best = grasp.runGraspRVND(rcl, tamanhoSelecao, nome, iteracoes);
         System.out.println("*");
         System.out.println("*");
         System.out.println("*");
