@@ -14,6 +14,7 @@ import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import weka.classifiers.Classifier;
+import weka.core.Instance;
 import weka.core.Instances;
 
 public class Apuracao {
@@ -90,16 +91,62 @@ public class Apuracao {
 //            testNormalInstances = ValidacaoWSN.mormalizar(testNormalInstances);
 
         }
-//        System.out.print("[" + (trainInstances.numAttributes() - 1)+" Features] - ");
+        System.out.print("[" + (trainInstances.numAttributes() - 1) + " Train Features] - ");
+        System.out.print("[" + (testAttackInstances.numAttributes() - 1) + " Test Features] - ");
         System.out.print(Arrays.toString(filter) + " - ");
         trainInstances.setClassIndex(trainInstances.numAttributes() - 1);
         testAttackInstances.setClassIndex(testAttackInstances.numAttributes() - 1);
         testNormalInstances.setClassIndex(testNormalInstances.numAttributes() - 1);
     }
 
+    public void testInstanceAndRetroFeed(Classifier classifier, int pos, boolean isAttack, boolean retrofeed) throws Exception {
+
+        if (isAttack) {
+            Instance instance_i = testAttackInstances.instance(pos);
+            double class1 = classifier.classifyInstance(instance_i);
+            if (retrofeed) {
+                instance_i.setClassValue(class1);
+                trainInstances.add(instance_i);
+            }
+            if (class1 == 0.0) { // O classificador diz que nao é ataque
+                setFN(getFN() + 1);         // Tráfego Ataque = Não detectado
+                if (debug) {
+                    System.err.println("[" + pos + "] FN: (" + class1 + ") deveria ser (1+ ataque)");
+                }
+            } else {
+                setVP(getVP() + 1);         // Tráfego Ataque = Detectado
+                if (debug) {
+                    System.err.println("[" + pos + "] VP: (" + class1 + ") realmente é (1+ ataque)");
+                }
+            }
+
+        } else {
+            Instance instance_i = testNormalInstances.instance(pos);
+            double class1 = classifier.classifyInstance(instance_i);
+            if (retrofeed) {
+                instance_i.setClassValue(class1);
+                trainInstances.add(instance_i);
+            }
+            if (class1 == 0.0) {
+                setVN(getVN() + 1);         // Tráfego Normal = Não detectado
+                if (debug) {
+                    System.err.println("[" + pos + "] VN: (" + class1 + ") realmente é (0 - normal)");
+                }
+            } else {
+                setFP(getFP() + 1);         // Tráfego Normal = Detecção Incorreta
+                if (debug) {
+                    System.err.println("[" + pos + "] FP: (" + class1 + ") deveria ser (0 -normal)");
+                }
+
+            }
+        }
+
+    }
+
     public void testInstance(Classifier classifier, int pos, boolean isAttack) throws Exception {
 
         if (isAttack) {
+
             double class1 = classifier.classifyInstance(testAttackInstances.instance(pos));
             if (class1 == 0.0) { // O classificador diz que nao é ataque
                 setFN(getFN() + 1);         // Tráfego Ataque = Não detectado
@@ -186,7 +233,7 @@ public class Apuracao {
             inicio = System.currentTimeMillis();
             long teste = System.currentTimeMillis();
             for (int i = 0; i < getExpectedNormals(); i++) {
-                testInstance(classifier, i, false);
+                testInstanceAndRetroFeed(classifier, i, false, true);
             }
 //            System.out.println("[Normal] Tempo de Classificação: " + (System.currentTimeMillis() - teste) + "ms");
 
@@ -214,7 +261,7 @@ public class Apuracao {
             inicio = System.currentTimeMillis();
             long teste = System.currentTimeMillis();
             for (int i = 0; i < getExpectedAttacks(); i++) {
-                testInstance(classifier, i, true);
+                testInstanceAndRetroFeed(classifier, i, false, true);
             }
 //            System.out.println("[Attack] Tempo de Classificação: " + (System.currentTimeMillis() - teste) + "ms");
 
@@ -229,17 +276,6 @@ public class Apuracao {
             e.printStackTrace();
         }
     }
-//
-//    public Resultado exportResultsCSV(String name) {
-//        double acuracia = (getVP() + getVN()) * 100 / (getVP() + getVN() + getFP() + getFN());
-//        print(name + "	" + getVP() + "	" + getFN() + "	" + getVN() + "	" + getFP() + "	" + getTempo() + " "
-//                + acuracia + getCpuLoad()); //acuracia
-//        setVN(0);
-//        setFN(0);
-//        setVP(0);
-//        setFP(0);
-//        return new Resultado(name, getVP(), getFN(), getVN(), getFP(), getTempo(), acuracia, getCpuLoad(), getMemoryLoad(), );
-//    }
 
     public Resultado getResults(String name) {
 //        System.out.println("TEMPO: " + getTempo());
