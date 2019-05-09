@@ -15,9 +15,6 @@ import inteligenciacomputacional.Run;
 import inteligenciacomputacional.Util;
 import static inteligenciacomputacional.Apuracao.readDataFile;
 import java.io.BufferedReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
 import weka.attributeSelection.GainRatioAttributeEval;
 import weka.attributeSelection.InfoGainAttributeEval;
 import weka.attributeSelection.OneRAttributeEval;
@@ -116,12 +113,14 @@ public class ValidacaoWSN {
 
     public static void main(String[] args) throws Exception {
 //        avaliarESelecionar(10);
+        System.out.println("-----WSn---");
+
         int it = 50;
         if (1 == 1) {
             for (int i = 1; i <= 1; i++) {
                 for (ClassifierExtended c : CLASSIFIERS_FOREACH) {
                     CLASSIFIERS[0] = c;
-                    graspVND(GR18WSN, 5, c.getClassifierName() + "WSN_RODADA_" + i + "_5F", it);
+                    graspRVND(GR18WSN, 5, c.getClassifierName() + "GRASP-RVND_WSN_RODADA_" + i + "_5F", it);
                 }
             }
         } else {

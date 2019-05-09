@@ -40,8 +40,9 @@ import weka.filters.unsupervised.attribute.Normalize;
 public class ValidacaoNSLKDD {
 
     // File locations
-    private static final String DIRETORIO = "C:\\Users\\sequi\\Google Drive\\2019\\Datasets\\NSL-KDD\\";
-
+//    private static final String DIRETORIO = "C:\\Users\\sequi\\Google Drive\\2019\\Datasets\\NSL-KDD\\";
+    private static final String DIRETORIO = "/home/silvio/datasets/NSL-KDD/";
+    public static final String SEPARATOR = "/";
     private static final String TRAIN_FILE = "train.txt";
     private static final String TEST_FILE = "test.txt";
     private static final String NORMAL_FILE = "normal.txt";
@@ -67,6 +68,7 @@ public class ValidacaoNSLKDD {
 
     // Run Settings
     private static final ClassifierExtended[] CLASSIFIERS_FOREACH = {eNBT, eNB, eRT, eKNN, ej48, eRF, eRepTree};
+//    private static final ClassifierExtended[] CLASSIFIERS_FOREACH = {eRT};
 
     private static ClassifierExtended[] CLASSIFIERS = new ClassifierExtended[1];
     private static final boolean TEST_NORMALS = true;
@@ -106,7 +108,7 @@ public class ValidacaoNSLKDD {
             for (int i = 1; i <= 2; i++) {
                 for (ClassifierExtended c : CLASSIFIERS_FOREACH) {
                     CLASSIFIERS[0] = c;
-                    graspVND(rcl, 5, c.getClassifierName() + "_KDD_RODADA_" + i + "_5F_", 10);
+                    graspRVND(rcl, 5, c.getClassifierName() + "GRASP-RVND_KDD_RODADA_" + i + "_5F_", 50);
                 }
             }
         }

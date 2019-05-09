@@ -22,7 +22,7 @@ public class NSLVND {
             long tempoInicial = System.currentTimeMillis();
             SolucaoNSL nova = buscaLocal(semente, i);
             long tempoFinal = System.currentTimeMillis() - tempoInicial;
-            System.out.println("-> END| Estrutura de Vizinhança: " + i + "["+tempoFinal+"]");
+            System.out.println("-> END| Estrutura de Vizinhança: " + i + "[" + tempoFinal + "]");
             if (nova.isBest(melhor)) {
                 melhor = nova.newClone();
             }
@@ -31,27 +31,39 @@ public class NSLVND {
     }
 
     public static SolucaoNSL doRVND(SolucaoNSL semente) throws Exception {
-        int min = 0;
-        int max = 2;
 
         // Inicializar T
         ArrayList<Integer> T = new ArrayList<>();
         T.add(0);
         T.add(1);
         T.add(2);
+        int min = 0;
+        int max = T.size();
+
         SolucaoNSL melhor = semente.newClone();
 
         while (T.size() > 0) {
-            int randomNum = ThreadLocalRandom.current().nextInt(min, max + 1);
-            SolucaoNSL nova = buscaLocal(semente, randomNum);
-            if (nova.isBest(melhor)) {
-                melhor = nova.newClone();
-                T = new ArrayList<>();
-                T.add(0);
-                T.add(1);
-                T.add(2);
-            } else {
-                T.remove(randomNum);
+            try {
+
+                int randomNum = ThreadLocalRandom.current().nextInt(min, max);
+                SolucaoNSL nova = buscaLocal(semente, randomNum);
+                if (nova.isBest(melhor)) {
+                    melhor = nova.newClone();
+                    T = new ArrayList<>();
+                    System.out.println("T: " + T.size());
+                    T.add(0);
+                    System.out.println("ADD(0) - T: " + T.size());
+                    T.add(1);
+                    System.out.println("ADD(1) - T: " + T.size());
+                    T.add(2);
+                    System.out.println("ADD(2) - T: " + T.size());
+                } else {
+                    T.remove(randomNum);
+                    System.out.println("REMOVE(" + randomNum + ") - T: " + T.size());
+                    max = T.size();
+                }
+            } catch (Exception e) {
+                System.out.println("***********Errinho bobo: " + e.getLocalizedMessage());
             }
         }
 

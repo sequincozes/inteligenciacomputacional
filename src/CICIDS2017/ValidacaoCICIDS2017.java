@@ -38,7 +38,7 @@ public class ValidacaoCICIDS2017 {
 
     // File locations
 //    private static final String DIRETORIO = "C:\\Users\\sequi\\Google Drive\\2019\\Datasets\\CICIDS2017\\sexta_full";
-    private static final String DIRETORIO = "/home/midiacom/datasets/CICIDS2017/";
+    private static final String DIRETORIO = "/home/silvio/datasets/CICIDS2017";
     public static final String SEPARATOR = "/";
 
     // CICIDS
@@ -65,8 +65,8 @@ public class ValidacaoCICIDS2017 {
     private static final ClassifierExtended eNBT = new ClassifierExtended(true, nbt, "NBTree");
 
     // Run Settings
+//    private static final ClassifierExtended[] CLASSIFIERS_FOREACH = {eNBT, eNB, eRT, eKNN, ej48, eRF, eRepTree};
     private static final ClassifierExtended[] CLASSIFIERS_FOREACH = {eNBT, eNB, eRT, eKNN, ej48, eRF, eRepTree};
-//    private static final ClassifierExtended[] CLASSIFIERS_FOREACH = {eRF, eRepTree};
 
     private static final ClassifierExtended[] CLASSIFIERS = new ClassifierExtended[1];
     private static final boolean TEST_NORMALS = true;
@@ -96,12 +96,15 @@ public class ValidacaoCICIDS2017 {
     static int[] GRASPRCLCICIDS = new int[]{53, 5, 64, 40, 7, 70, 9, 54, 41, 42, 43, 67, 35, 56, 49, 6, 66, 13, 55, 11};
 
     public static void main(String[] args) throws Exception {
-//        avaliarESelecionar(5);
+//        avaliarESelecionar(25);
+        System.out.println("-----CICIDS---");
         if (1 == 1) {
             for (int i = 1; i <= 2; i++) {
                 for (ClassifierExtended c : CLASSIFIERS_FOREACH) {
                     CLASSIFIERS[0] = c;
-                    graspVND(GRASPRCLCICIDS, 5, c.getClassifierName() + "CIDIDS_RODADA_" + i + "_5F", 100);
+//                    grasp(GRASPRCLCICIDS, 5, c.getClassifierName() + "TODAY_GRASP-FS_CIDIDS_RODADA_" + i + "_5F", 50);
+                    graspRVND(GRASPRCLCICIDS, 5, c.getClassifierName() + "CIDIDS_RODADA_" + i + "_5F", 50);
+
                 }
             }
         }
@@ -229,9 +232,9 @@ public class ValidacaoCICIDS2017 {
             long tempo = System.currentTimeMillis();
             /* Método de Avaliação de Feature */
 //            double resultado = calcularGI(i);
-            double resultado = calcularOneRAttributeEval(i);
+//            double resultado = calcularOneRAttributeEval(i);
 //            double resultado = calcularReliefF(i);
-//            double resultado = calcularGainRatioAttributeEval(i);
+            double resultado = calcularGainRatioAttributeEval(i);
 
             long tempoNovo = System.currentTimeMillis();
             tempoTotalFeature = tempoTotalFeature + tempoNovo;
@@ -318,7 +321,7 @@ public class ValidacaoCICIDS2017 {
     }
 
     public static double calcularOneRAttributeEval(int featureIndice) throws Exception {
-        BufferedReader dataset = readDataFile(DIRETORIO + ATTACKS_TYPES[0].getAttackName() + SEPARATOR + ATTACKS_TYPES[0].getAttackName() + TRAIN_FILE);
+        BufferedReader dataset = readDataFile(DIRETORIO + ATTACKS_TYPES[0].getAttackName() + ATTACKS_TYPES[0].getAttackName() + TRAIN_FILE);
         Instances instances = new Instances(dataset);
         if (NORMALIZE) {
             instances = mormalizar(instances);
@@ -346,7 +349,7 @@ public class ValidacaoCICIDS2017 {
     }
 
     public static double calcularGainRatioAttributeEval(int featureIndice) throws Exception {
-        BufferedReader dataset = readDataFile(DIRETORIO + ATTACKS_TYPES[0].getAttackName() + "\\" + ATTACKS_TYPES[0].getAttackName() + TRAIN_FILE);
+        BufferedReader dataset = readDataFile(DIRETORIO + ATTACKS_TYPES[0].getAttackName() + SEPARATOR + ATTACKS_TYPES[0].getAttackName() + TRAIN_FILE);
         Instances instances = new Instances(dataset);
         if (NORMALIZE) {
             instances = mormalizar(instances);
@@ -375,6 +378,19 @@ public class ValidacaoCICIDS2017 {
         System.out.println("* Iniciou GRASP VND... *");
 
         SolucaoCICIDS2017 best = grasp.runGraspVND(rcl, tamanhoSelecao, nome, iteracoes);
+        System.out.println("*");
+        System.out.println("*");
+        System.out.println("*");
+        System.out.println("*");
+        System.out.println("Conjunto: " + best.getFeaturesSelecionadas().toString());
+        System.out.println("Acurácia: " + best.getAcuracia());
+    }
+
+    private static void graspRVND(int[] rcl, int tamanhoSelecao, String nome, int iteracoes) throws Exception, Exception {
+        GraspCICIDS2017 grasp = new GraspCICIDS2017();
+        System.out.println("* Iniciou GRASP VND... *");
+
+        SolucaoCICIDS2017 best = grasp.runGraspRVND(rcl, tamanhoSelecao, nome, iteracoes);
         System.out.println("*");
         System.out.println("*");
         System.out.println("*");
