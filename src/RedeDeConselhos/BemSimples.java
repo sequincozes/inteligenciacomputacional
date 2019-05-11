@@ -19,7 +19,7 @@ public class BemSimples {
 
     static Instances[] allInstances;
     static Classifier selectedClassifier = Parameters.RANDOM_FOREST.getClassifier();
-    static boolean rawOutput = true;
+    static boolean rawOutput = false;
 
     public static void main(String[] args) throws Exception {
         allInstances = Util.loadAndFilter(false);
@@ -29,15 +29,15 @@ public class BemSimples {
 
         if (true) {
             for (int i = 0; i < 5000; i = i + 500) {
-                Resultado r = validaEssaGalera("RandomForest", i, i + 500);
-//            Resultado r = validaEssaGaleraRetroalimentando("RandomForest", i, i + 500);
+//                Resultado r = validaEssaGalera("RandomForest", i, i + 500);
+            Resultado r = validaEssaGaleraRetroalimentando("RandomForest", i, i + 500);
 //            Resultado r = validaEssaGaleraRetroalimentandoPerfeitamente("RandomForest", i, i + 500);;
 
                 if (rawOutput) {
                     System.out.println((allInstances[0].numInstances() - 1001) + ";" + String.valueOf(r.getAcuracia()).replace(".", ",") + "%");
 //                System.out.println(String.valueOf(r.getAcuracia()).replace(".", ",") + "%");
                 } else {
-                    System.out.println("[" + i + " à " + (i + 500) + "] - Train: " + (allInstances[0].numInstances() - 1001) + " | Acurácia: " + r.getAcuracia() + "Alarme Falso: " + r.getTaxaAlarmeFalsos() + "Detecção: " + r.getTaxaDeteccao() + "VP: " + r.getVP() + ", VN: " + r.getVN() + ", FN: " + r.getFN() + ", FP: " + r.getFP());
+                    System.out.println("[" + i*2 + " à " + (i*2 + 500*2) + "] - Train: " + (allInstances[0].numInstances() - 1001) + " | Acurácia: " + r.getAcuracia() + "Alarme Falso: " + r.getTaxaAlarmeFalsos() + "Detecção: " + r.getTaxaDeteccao() + "VP: " + r.getVP() + ", VN: " + r.getVN() + ", FN: " + r.getFN() + ", FP: " + r.getFP());
                 }
             }
         }
