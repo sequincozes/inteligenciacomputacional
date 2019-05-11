@@ -119,7 +119,7 @@ public class Apuracao {
                     System.err.println("[" + pos + "] VP: (" + class1 + ") realmente é (1+ ataque)");
                 }
             }
-
+          
         } else {
             Instance instance_i = testNormalInstances.instance(pos);
             double class1 = classifier.classifyInstance(instance_i);
@@ -139,7 +139,7 @@ public class Apuracao {
                 }
 
             }
-        }
+           }
 
     }
 
