@@ -27,6 +27,7 @@ import weka.classifiers.trees.NBTree;
 import weka.classifiers.trees.REPTree;
 import weka.classifiers.trees.RandomForest;
 import weka.classifiers.trees.RandomTree;
+import weka.core.Instance;
 import weka.core.Instances;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Normalize;
@@ -67,7 +68,7 @@ public class Validacao_RC_CICIDS2017 {
 
     // Run Settings
 //    private static final ClassifierExtended[] CLASSIFIERS_FOREACH = {eNBT, eNB, eRT, eKNN, ej48, eRF, eRepTree};
-    private static final ClassifierExtended[] CLASSIFIERS_FOREACH = {eNBT, eNB, eRT, eKNN, ej48, eRF, eRepTree};
+    private static final ClassifierExtended[] CLASSIFIERS_FOREACH = {eNBT, eNB, eRT,  ej48, eRF, eRepTree};
 
     private static final ClassifierExtended[] CLASSIFIERS = new ClassifierExtended[1];
     private static final boolean TEST_NORMALS = false;
@@ -90,19 +91,23 @@ public class Validacao_RC_CICIDS2017 {
         return instanceBulk;
     }
 
-    static int[] RedeDeConselhos_GR = new int[]{53, 5, 64, 40, 7, 70, 9, 54, 41, 42, 43, 67, 35, 49, 6, 66, 13, 55, 11, 1};
-    
+    static int[] RedeDeConselhos_GR = new int[]{53, 5, 64, 40, 7, 70, 9};//, 54, 41, 42, 43, 67, 35, 49, 6, 66, 13, 55, 11, 1};
+
     public static void main(String[] args) throws Exception {
 //        avaliarESelecionar(25);
         CLASSIFIERS[0] = eNB;
 //        executar(OneRCICIDS);;
-        vaiDevagar(RedeDeConselhos_GR);
+
+        Apuracao_RC a = treinar(RedeDeConselhos_GR);
+        System.out.println("Treinou: " + a.trainInstances.numInstances() + " instancias.");
+        for (ClassifierExtended cex : CLASSIFIERS_FOREACH) {
+            System.out.print(cex.getClassifierName() + ": ");
+            vaiDevagar(cex, a);
+        }
     }
 
-    public static void vaiDevagar(int[] filterParaManter) throws Exception {
+    public static Apuracao_RC treinar(int[] filterParaManter) throws Exception {
         Attack attack = ATTACKS_TYPES[0];
-        ClassifierExtended classifierExtended = CLASSIFIERS[0];
-
         Apuracao_RC a = new Apuracao_RC(
                 attack.getNumberAttacks(),
                 attack.getNumberNormals(),
@@ -117,18 +122,29 @@ public class Validacao_RC_CICIDS2017 {
 
         // Offline train
         a.loadAndFilter(filterParaManter, true);
+        return a;
+    }
+
+    public static void vaiDevagar(ClassifierExtended classifierExtended, Apuracao_RC a) throws Exception {
+
+//        Instances instances = a.trainInstances;
+//        for (int i = 0; i < instances.numInstances(); i++) {
+//            System.out.println(a.trainInstances.instance(i));
+//        }
         Classifier c = classifierExtended.getClassifier();
         c.buildClassifier(a.getDataTreined());
 
-        int ind = a.getDataTreined().numInstances();
-        System.out.println("Instância [" + (ind - 1) + "]" + a.getDataTreined().instance(ind - 1));
-
+//        int ind = a.getDataTreined().numInstances();
+//        System.out.println("Instância [" + (ind - 1) + "]" + a.getDataTreined().instance(ind - 1));
+        boolean retrofeedTest = false;
         for (int i = 0; i < a.getExpectedAttacks(); i++) {
-            if (i == (a.getExpectedAttacks() / 2)) {
-                System.out.println("Resultado: " + a.getResults("Resultados").getAcuracia() + "(VN: " + a.getVN() + ", VP:" + a.getVP() + ", FP:" + a.getFP() + ", FN:" + a.getFN());
-                ind = a.getDataTreined().numInstances();
-                System.out.println("Instância [" + (ind - 1) + "]" + a.getDataTreined().instance(ind - 1));
-                c.buildClassifier(a.getDataTreined());
+            if (retrofeedTest) {
+                if (i == (a.getExpectedAttacks() / 2)) {
+                    System.out.println("Resultado: " + a.getResults("Resultados").getAcuracia() + "(VN: " + a.getVN() + ", VP:" + a.getVP() + ", FP:" + a.getFP() + ", FN:" + a.getFN());
+//                    ind = a.getDataTreined().numInstances();
+//                    System.out.println("Instância [" + (ind - 1) + "]" + a.getDataTreined().instance(ind - 1));
+                    c.buildClassifier(a.getDataTreined());
+                }
             }
             a.testInstanceAndRetroFeed(c, i, true, true);
 //            System.out.println("Resultado: " + a.getResults("Resultados").getAcuracia() + "(VN: " + a.getVN() + ", VP:" + a.getVP() + ", FP:" + a.getFP() + ", FN:" + a.getFN());

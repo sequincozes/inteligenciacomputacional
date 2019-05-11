@@ -92,8 +92,8 @@ public class Apuracao_RC {
 //            testNormalInstances = ValidacaoWSN.mormalizar(testNormalInstances);
 
         }
-        System.out.print("[" + (trainInstances.numAttributes() - 1) + " Train Features] - ");
-        System.out.print("[" + (testAttackInstances.numAttributes() - 1) + " Test Features] - ");
+//        System.out.print("[" + (trainInstances.numAttributes() - 1) + " Train Features] - ");
+//        System.out.print("[" + (testAttackInstances.numAttributes() - 1) + " Test Features] - ");
         System.out.print(Arrays.toString(filter) + " - ");
         trainInstances.setClassIndex(trainInstances.numAttributes() - 1);
         testAttackInstances.setClassIndex(testAttackInstances.numAttributes() - 1);
