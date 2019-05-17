@@ -9,6 +9,7 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.Arrays;
+import weka.clusterers.SimpleKMeans;
 import weka.core.Instances;
 
 /**
@@ -54,32 +55,43 @@ public class Util {
 
     public static Instances[] loadAndFilter(boolean printSelection) throws Exception {
 
-        Instances trainInstances = new Instances(Util.readDataFile(Parameters.TRAIN_FILE));
-        Instances testAttackInstances = new Instances(Util.readDataFile(Parameters.TEST_ATTACK_FILE));
-        Instances testNormalInstances = new Instances(Util.readDataFile(Parameters.TEST_NORMAL_FILE));
-
+        Instances trainInstances = new Instances(Util.readDataFile(Parameters.FILE_TRAIN));
+        Instances evaluationInstances = new Instances(Util.readDataFile(Parameters.FILE_EVALUATION));
+        Instances testInstances = new Instances(Util.readDataFile(Parameters.FILE_TEST));
+        
+        /* Não-Supervisionado: K-Means */
+        Instances evaluationInstancesNoLabel = new Instances(Util.readDataFile(Parameters.FILE_EVALUATION));
+        evaluationInstancesNoLabel.deleteAttributeAt(evaluationInstancesNoLabel.numAttributes()-1); // Remove classe
+        
+        
         if (Parameters.FEATURE_SELECTION.length > 0) {
-            testAttackInstances = Util.applyFilterKeep(testAttackInstances);
             trainInstances = Util.applyFilterKeep(trainInstances);
-            testNormalInstances = Util.applyFilterKeep(testNormalInstances);
+            evaluationInstances = Util.applyFilterKeep(evaluationInstances);
+            testInstances = Util.applyFilterKeep(testInstances);
             if (printSelection) {
                 System.out.print(Arrays.toString(Parameters.FEATURE_SELECTION) + " - ");
                 System.out.println("trainInstances: " + trainInstances.numAttributes());
-                System.out.print("testAttackInstances: " + testAttackInstances.numAttributes());
-                System.out.print("testNormalInstances: " + testNormalInstances.numAttributes());
+                System.out.print("evaluationInstances: " + evaluationInstances.numAttributes());
+                System.out.print("testInstances: " + testInstances.numAttributes());
             }
             trainInstances.setClassIndex(trainInstances.numAttributes() - 1);
-            testAttackInstances.setClassIndex(testAttackInstances.numAttributes() - 1);
-            testNormalInstances.setClassIndex(testNormalInstances.numAttributes() - 1);
+            evaluationInstances.setClassIndex(evaluationInstances.numAttributes() - 1);
+            testInstances.setClassIndex(testInstances.numAttributes() - 1);
+
         }
 
-        return new Instances[]{trainInstances, testAttackInstances, testNormalInstances};
+        return new Instances[]{trainInstances, evaluationInstances, testInstances, evaluationInstancesNoLabel};
 
     }
 
-//    public static Instances trainInstances createPartition(Instances trainInstances, int i) {
-//        Instances partition = trainInstances.
-//                
-//                return partition;
-//    }
+    public static SimpleKMeans clusterData(Instances evaluation, int k) throws Exception {
+        SimpleKMeans kmeans = new SimpleKMeans();
+        kmeans.setSeed(k);
+        kmeans.setPreserveInstancesOrder(true);
+        kmeans.setNumClusters(k);
+        kmeans.buildClusterer(evaluation);
+        return kmeans;
+
+    }
+
 }

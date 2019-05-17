@@ -22,12 +22,11 @@ import weka.classifiers.trees.RandomTree;
  */
 public class Parameters {
 
-    public static final String DIRETORIO = "/home/silvio/datasets/CICIDS2017_RC";
+    public static final String DIRETORIO = "/home/silvio/datasets/CICIDS2017_RC/DETECTOR_DOIS_WEDNESDAY";
     public static final String SEPARATOR = "/";
-    public static final String TRAIN_FILE = DIRETORIO + SEPARATOR + "treino_binario_1000_1000.csv";
-    public static final String TEST_ATTACK_FILE = DIRETORIO + SEPARATOR + "ataque_binario_10k.csv";
-    public static final String TEST_NORMAL_FILE = DIRETORIO + SEPARATOR + "normal_10k.csv";
-    public static final Attack BINARY = new Attack("binario", 260228, 258263, Run.INCLUDE);
+    public static final String FILE_TRAIN = DIRETORIO + SEPARATOR + "10_train_files" + SEPARATOR + "compilado_train.csv"; //treino_binario_1000_1000
+    public static final String FILE_EVALUATION = DIRETORIO + SEPARATOR + "10_evaluation_files" + SEPARATOR + "compilado_evaluation.csv"; //ataque_binario_10k
+    public static final String FILE_TEST = DIRETORIO + SEPARATOR + "80_test_files" + SEPARATOR + "compilado_test.csv"; //ataque_binario_10k
 
     public static final ClassifierExtended RANDOM_TREE = new ClassifierExtended(true, new RandomTree(), "RandomTree");
     public static final ClassifierExtended RANDOM_FOREST = new ClassifierExtended(true, new RandomForest(), "RandomForest");
@@ -38,14 +37,15 @@ public class Parameters {
     public static final ClassifierExtended NBTREE = new ClassifierExtended(true, new NBTree(), "NBTree");
 
     // Run Settings
-    public static final ClassifierExtended[] CLASSIFIERS_FOREACH = {NBTREE, NAIVE_BAYES, RANDOM_TREE, J48, RANDOM_FOREST, REP_TREE}; // KNN está fora
+    public static final ClassifierExtended[] CLASSIFIERS_FOREACH = {NBTREE, RANDOM_TREE, J48, RANDOM_FOREST, REP_TREE, NAIVE_BAYES};// KNN está fora
     public static final boolean TEST_NORMALS = false;
     public static final boolean TEST_ATTACKS = true;
     public static final int TOTAL_FEATURES = 78;
-    public static final Attack[] ATTACKS_TYPES = {BINARY};
     public static final boolean NORMALIZE = false;
 
     //Selected by GR
-    static int[] FEATURE_SELECTION = new int[]{53, 5, 64, 40, 7, 70, 9, 54, 41, 42, 43, 67, 35, 49, 6, 66, 13, 55, 11, 1};
+//    static int[] FEATURE_SELECTION = new int[]{53, 5, 64, 40, 7, 70, 9, 54, 41, 42, 43, 67, 35, 49, 6, 66, 13, 55, 11, 1};
+    //Selected by OneR
+    static int[] FEATURE_SELECTION = new int[]{79, 40, 68, 13, 55};
 
 }
