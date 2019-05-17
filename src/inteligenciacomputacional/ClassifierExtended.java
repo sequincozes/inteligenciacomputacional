@@ -46,4 +46,13 @@ public class ClassifierExtended {
     public void setClassifierName(String ClassifierName) {
         this.ClassifierName = ClassifierName;
     }
+
+    public double getTempDecision() {
+        return tempDecision;
+    }
+
+    public void setTempDecision(double tempDecision) {
+        this.tempDecision = tempDecision;
+    }
+    private double tempDecision;
 }

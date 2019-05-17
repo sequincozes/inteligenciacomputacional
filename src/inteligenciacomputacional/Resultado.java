@@ -44,6 +44,32 @@ public class Resultado {
         this.memoryLoad = memoryLoad;
     }
 
+    public Resultado(String descricao, float VP, float FN, float VN, float FP, double acuracia, double txDet, double txAFal) {
+        this.Cx = descricao;
+        this.VP = VP;
+        this.FN = FN;
+        this.VN = VN;
+        this.FP = FP;
+        this.acuracia = acuracia;
+        this.taxaDeteccao = txDet;
+        this.taxaAlarmeFalsos = txAFal;
+    }
+
+    public Resultado(String descricao, float VP, float FN, float VN, float FP) {
+        this.Cx = descricao;
+        this.VP = VP;
+        this.FN = FN;
+        this.VN = VN;
+        this.FP = FP;
+    }
+
+    public Resultado recalcular() {
+        this.acuracia = Float.valueOf(((getVP() + getVN()) * 100) / (getVP() + getVN() + getFP() + getFN()));;
+        this.taxaDeteccao = Float.valueOf((getVP() * 100) / (getVP() + getFN()));
+        this.taxaAlarmeFalsos = Float.valueOf((getFP() * 100) / (getVN() + getFP()));
+        return this;
+    }
+
     public String getCx() {
         return Cx;
     }

@@ -228,12 +228,13 @@ public class Apuracao {
         try {
             long inicioInicial = System.currentTimeMillis();
             long inicio = System.currentTimeMillis();
+//            System.out.println(getDataTreined());
             classifier.buildClassifier(getDataTreined());
 //            System.out.println("[Normal] Tempo de construção: " + ((long) (System.currentTimeMillis() - inicio)) + " ms");
             inicio = System.currentTimeMillis();
             long teste = System.currentTimeMillis();
             for (int i = 0; i < getExpectedNormals(); i++) {
-                testInstanceAndRetroFeed(classifier, i, false, true);
+                testInstanceAndRetroFeed(classifier, i, false, false);
             }
 //            System.out.println("[Normal] Tempo de Classificação: " + (System.currentTimeMillis() - teste) + "ms");
 
@@ -261,7 +262,7 @@ public class Apuracao {
             inicio = System.currentTimeMillis();
             long teste = System.currentTimeMillis();
             for (int i = 0; i < getExpectedAttacks(); i++) {
-                testInstanceAndRetroFeed(classifier, i, false, true);
+                testInstanceAndRetroFeed(classifier, i, true, false);
             }
 //            System.out.println("[Attack] Tempo de Classificação: " + (System.currentTimeMillis() - teste) + "ms");
 
