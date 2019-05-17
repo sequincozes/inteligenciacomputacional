@@ -27,13 +27,19 @@ public class BemSimples {
 
     public static void main(String[] args) throws Exception {
         allInstances = Util.loadAndFilter(false);
-//        SimpleKMeans kmeans = avaliacaoComClustering(6);
-//        testeComClustering(kmeans);
-        semClustering();
+        SimpleKMeans kmeans = avaliacaoComClustering(6, allInstances[0], allInstances[1], allInstances[3]);
+        testeComClustering(kmeans, allInstances[1]);
+        System.out.println(kmeans.clusterInstance(kmeans.getClusterCentroids().instance(0)));
+        System.out.println(kmeans.clusterInstance(kmeans.getClusterCentroids().instance(1)));
+        System.out.println(kmeans.clusterInstance(kmeans.getClusterCentroids().instance(2)));
+        System.out.println(kmeans.clusterInstance(kmeans.getClusterCentroids().instance(3)));
+        System.out.println(kmeans.clusterInstance(kmeans.getClusterCentroids().instance(4)));
+        System.out.println(kmeans.clusterInstance(kmeans.getClusterCentroids().instance(5)));
+//        semClustering();
 
     }
 
-    public static void testeComClustering(SimpleKMeans kmeans) throws Exception {
+    public static void testeComClustering(SimpleKMeans kmeans, Instances instancias) throws Exception {
         Resultado finalResult = new Resultado("FinalResult", 0, 0, 0, 0);
 
         /* Prepare Header Conflicting Results */
@@ -46,14 +52,16 @@ public class BemSimples {
             }
         }
         System.out.println("");
-        for (int i = 0; i < allInstances[2].numInstances(); i++) {
+        for (int i = 0; i < instancias.numInstances(); i++) {
             String outputConflitos = "";
-            Instance testando = allInstances[2].instance(i);
+            Instance testando = instancias.instance(i);
 
             /* Prepare Conflicting Results */
-            Instance tempInstance = new Instance(allInstances[2].instance(i));
-            tempInstance.isMissing(tempInstance.numAttributes() - 1);
+            Instance tempInstance = new Instance(instancias.instance(i));
+//            tempInstance.isMissing(tempInstance.numAttributes() - 1);
+
             int clusterNum = kmeans.clusterInstance(tempInstance);
+//            System.out.println("Cluster:" + clusterNum + "tempInstance: " + tempInstance);
             outputConflitos = outputConflitos + i + "," + clusterNum + "," + testando.classValue() + ",";
 
             ArrayList<ClassifierExtended> errados = new ArrayList();
@@ -75,7 +83,7 @@ public class BemSimples {
                     outputConflitos = outputConflitos + tempClassifier.getTempDecision() + ",";
                 }
             }
-            
+
             boolean existemErros = (certos.size() < Parameters.CLASSIFIERS_FOREACH.length);
             boolean existemAcertos = (errados.size() < Parameters.CLASSIFIERS_FOREACH.length);
             if (existemAcertos && existemErros) {
@@ -97,15 +105,15 @@ public class BemSimples {
 
     }
 
-    public static SimpleKMeans avaliacaoComClustering(int k) throws Exception {
-        if (allInstances[1].numInstances() != allInstances[3].numInstances()) {
+    public static SimpleKMeans avaliacaoComClustering(int k, Instances treino, Instances avaliacao, Instances avaliacaoLimpa) throws Exception {
+        if (avaliacao.numInstances() != avaliacaoLimpa.numInstances()) {
             System.out.println("Bases de avaliação com tamanhos diferentes.");
             return null;
         }
-        SimpleKMeans kmeans = Util.clusterData(allInstances[3], k);
+        SimpleKMeans kmeans = Util.clusterData(avaliacaoLimpa, k);
         for (ClassifierExtended CLASSIFIERS_FOREACH : Parameters.CLASSIFIERS_FOREACH) {
             selectedClassifier = CLASSIFIERS_FOREACH.getClassifier();
-            selectedClassifier.buildClassifier(allInstances[0]);
+            selectedClassifier.buildClassifier(treino);
             Resultado[] clustersResults = new Resultado[k];
             int numCluster = 0;
 
@@ -119,7 +127,7 @@ public class BemSimples {
                 int cluster = assignments[i];
 //                System.out.println("Cluster " + cluster + ": " + i);
                 // Classificação
-                Instance testando = allInstances[1].instance(i); // Avaliação com Label
+                Instance testando = avaliacao.instance(i); // Avaliação com Label
                 double res1 = selectedClassifier.classifyInstance(testando);
                 updateClusterResult(clustersResults, cluster, testando, res1);
             }
@@ -153,7 +161,7 @@ public class BemSimples {
         if (true) {
             for (ClassifierExtended CLASSIFIERS_FOREACH : Parameters.CLASSIFIERS_FOREACH) {
                 selectedClassifier = CLASSIFIERS_FOREACH.getClassifier();
-                Resultado rs = avaliaEssaGalera(CLASSIFIERS_FOREACH.getClassifierName(), allInstances[0], allInstances[1]);
+                Resultado rs = avaliaEssaGalera(CLASSIFIERS_FOREACH.getClassifierName(), allInstances[0], allInstances[2]);
 //            System.out.println(String.valueOf(rs.getCx() + " => " + " | Acurácia: " + rs.getAcuracia() + "Alarme Falso: " + rs.getTaxaAlarmeFalsos() + "Detecção: " + rs.getTaxaDeteccao() + "VP: " + rs.getVP() + ", VN: " + rs.getVN() + ", FN: " + rs.getFN() + ", FP: " + rs.getFP()));
                 System.out.println(String.valueOf(rs.getCx() + ";" + String.valueOf(rs.getAcuracia()).replace(".", ",") + "%" + ";" + String.valueOf(rs.getTaxaAlarmeFalsos()).replace(".", ",") + "%" + ";" + String.valueOf(rs.getTaxaDeteccao()).replace(".", ",") + "%" + ";" + rs.getVP() + ";" + rs.getVN() + ";" + rs.getFN() + ";" + rs.getFP()));
             }
