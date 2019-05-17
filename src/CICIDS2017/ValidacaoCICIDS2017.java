@@ -98,7 +98,7 @@ public class ValidacaoCICIDS2017 {
     public static void main(String[] args) throws Exception {
 //        avaliarESelecionar(25);
         System.out.println("-----CICIDS---");
-        if (1 == 1) {
+        if (1 == 0) {
             for (int i = 1; i <= 2; i++) {
                 for (ClassifierExtended c : CLASSIFIERS_FOREACH) {
                     CLASSIFIERS[0] = c;
@@ -109,8 +109,8 @@ public class ValidacaoCICIDS2017 {
             }
         }
 
-//        CLASSIFIERS[0] = eNB;
-//        executar(OneRCICIDS);
+        CLASSIFIERS[0] = eNB;
+        executar(OneRCICIDS);
     }
 
     public static Resultado executar(int[] filterParaManter) throws Exception {
@@ -129,7 +129,6 @@ public class ValidacaoCICIDS2017 {
                         TOTAL_FEATURES
                 );
 
-                a.loadAndFilter(filterParaManter, true);
                 System.out.println("Filtro aplicado: " + filterParaManter.length + " features mantidas.");
                 for (ClassifierExtended CLASSIFIERS_AUX : CLASSIFIERS) {
 
@@ -139,12 +138,15 @@ public class ValidacaoCICIDS2017 {
                     String name = classifierExtended.getClassifierName();
                     if (classifierExtended.isIncludeOnTests()) {
                         long cpu = System.currentTimeMillis();
+                        a.loadAndFilter(filterParaManter, true);
                         if (TEST_NORMALS) {
                             a.runWithNormals(classifier, name);
                         }
                         if (TEST_ATTACKS) {
                             a.runWithAttacks(classifier, name);
                         }
+
+                        /* Aqui que eu tenho medo */
                         resultado = a.getResults(attack.getAttackName() + "/" + name);
                         /**
                          * @TODO: Acumular resultados de múltiplos ataques e
