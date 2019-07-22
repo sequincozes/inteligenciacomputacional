@@ -29,9 +29,9 @@ public class FeatureRanking {
     };
 
     public static void main(String[] args) throws Exception {
-        avaliarESelecionar(5, METODO.OneR, false); // OneR: 6, 7, 2, 8, 17
-        avaliarESelecionar(5, METODO.GR, false); // {5, 12, 7, 9, 41, 3, 13, 6, 11, 39, 8, 35, 40, 1, 36, 4, 22, 14, 21, 10, 25, }
-        avaliarESelecionar(5, METODO.IG, false); // IG: 6, 2, 7, 15, 3
+        avaliarESelecionar(6, METODO.OneR, false); // OneR: 6, 7, 2, 8, 17
+//        avaliarESelecionar(5, METODO.IG, false); // IG: 6, 2, 7, 15, 3
+//        avaliarESelecionar(5, METODO.GR, false); // {5, 12, 7, 9, 41, 3, 13, 6, 11, 39, 8, 35, 40, 1, 36, 4, 22, 14, 21, 10, 25, }
 
     }
 
@@ -46,8 +46,7 @@ public class FeatureRanking {
         switch (metodo) {
             case IG:
                 System.out.println("IG:");
-                for (int i = 0; i < instances.numAttributes(); i++) {
-                    System.out.println("IG:");
+              for (int i = 0; i < instances.numAttributes(); i++) {
                     allFeatures[i] = new FeatureAvaliada(calcularaIG(instances, i), i + 1);
                 }
                 break;

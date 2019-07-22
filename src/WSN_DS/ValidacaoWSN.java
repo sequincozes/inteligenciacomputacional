@@ -116,7 +116,7 @@ public class ValidacaoWSN {
         System.out.println("-----WSn---");
 
         int it = 50;
-        if (1 == 1) {
+        if (1 == 0) {
             for (int i = 1; i <= 1; i++) {
                 for (ClassifierExtended c : CLASSIFIERS_FOREACH) {
                     CLASSIFIERS[0] = c;
@@ -124,11 +124,13 @@ public class ValidacaoWSN {
                 }
             }
         } else {
-//        executar(new int[]{53,5,40,6,56});// 98.4011 RandomTree (VN: 256614.0 VP: 253587.0 FN: 6641.0 FP: 1649.0)
+            long time = System.currentTimeMillis();
+            executar(new int[]{1,2,3,4,5});// 98.4011 RandomTree (VN: 256614.0 VP: 253587.0 FN: 6641.0 FP: 1649.0)
+            long timeend = System.currentTimeMillis();
+            System.out.println(timeend - time + "ms");
 //        executar(new int[]{6,64,66,35,5});// 99.1347 KNN (VN: 256760.0 VP: 257245.0 FN: 2983.0 FP: 1503.0)
 //        CLASSIFIERS[0] = eRepTree;
 //        executar(new int[]{64,70,42,53,56}); //(82.1541748046875%)
-
 //        grasp(GR18WSN, 5, "T2");
 //        computarEGravar();
 //        System.out.println("----------------------- GR");
@@ -168,7 +170,7 @@ public class ValidacaoWSN {
                         classifier = classifierExtended.getClassifier();
                     } catch (NullPointerException n) {
 //                        System.out.println("NullPointer: Classificador Padrão: " + eNB.getClassifierName());
-                        CLASSIFIERS[0] = eNB;
+                        CLASSIFIERS[0] = eKNN;
                         classifierExtended = CLASSIFIERS[0];
                         classifier = classifierExtended.getClassifier();
                     }

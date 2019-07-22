@@ -7,7 +7,6 @@ package RedeDeConselhos;
 
 import inteligenciacomputacional.ClassifierExtended;
 import inteligenciacomputacional.Resultado;
-import java.io.BufferedReader;
 import java.util.ArrayList;
 import weka.classifiers.Classifier;
 import weka.clusterers.SimpleKMeans;
@@ -21,29 +20,104 @@ import weka.core.Instances;
 public class BemSimples {
 
     static Instances[] allInstances;
-    static Classifier selectedClassifier = Parameters.NAIVE_BAYES.getClassifier();
+    static Classifier selectedClassifier = null;// Parameters.NAIVE_BAYES.getClassifier();
     static boolean rawOutput = false;
     static boolean debug = false;
 
     public static void main(String[] args) throws Exception {
-        allInstances = Util.loadAndFilter(false);
-        SimpleKMeans kmeans = avaliacaoComClustering(6, allInstances[0], allInstances[1], allInstances[3]);
-        testeComClustering(kmeans, allInstances[1]);
-        System.out.println(kmeans.clusterInstance(kmeans.getClusterCentroids().instance(0)));
-        System.out.println(kmeans.clusterInstance(kmeans.getClusterCentroids().instance(1)));
-        System.out.println(kmeans.clusterInstance(kmeans.getClusterCentroids().instance(2)));
-        System.out.println(kmeans.clusterInstance(kmeans.getClusterCentroids().instance(3)));
-        System.out.println(kmeans.clusterInstance(kmeans.getClusterCentroids().instance(4)));
-        System.out.println(kmeans.clusterInstance(kmeans.getClusterCentroids().instance(5)));
-//        semClustering();
+        allInstances = Util.loadAndFilter(false, true);
+//        int K = 5; // Conselheiro (Detector 2)
+//        int K = 4; // Detector 
+//        System.out.println("K=" + K);
+//        SimpleKMeans kmeans = avaliacaoComClustering(K, allInstances[0], allInstances[1], allInstances[3]);
+//        Resultado rs = testeComClustering(kmeans, allInstances[2], K, true);;
+//        System.out.println(String.valueOf(rs.getCx() + ";" + String.valueOf(rs.getAcuracia()).replace(".", ",") + "%" + ";" + String.valueOf(rs.getTaxaAlarmeFalsos()).replace(".", ",") + "%" + ";" + String.valueOf(rs.getTaxaDeteccao()).replace(".", ",") + "%" + ";" + rs.getVP() + ";" + rs.getVN() + ";" + rs.getFN() + ";" + rs.getFP()));;
+
+//        semClustering(allInstances[1]);
+        BemSimples.anomalyTests(331541);
+    }
+
+    public static void anomalyTests(int firstNormals) throws Exception {
+        SimpleKMeans kmeans = new SimpleKMeans();
+        kmeans.setPreserveInstancesOrder(true);
+        kmeans.setNumClusters(4);
+        kmeans.buildClusterer(allInstances[0]);
+        int VP = 0, VN = 0, FP = 0, FN = 0;
+        long timeTotal = 0;
+
+        // Modelo
+        if (true) {
+            int[] assignments = kmeans.getAssignments();
+            int i = 0;
+            int normal = 41434;
+            int c0N = 0, c1N = 0, c2N = 0, c3N = 0;
+            int c0A = 0, c1A = 0, c2A = 0, c3A = 0;
+            for (int clusterNum : assignments) {
+//                System.out.printf("Instance %d -> Cluster %d \n", i, clusterNum);
+                if (clusterNum == 0 && i < normal) {
+                    c0N++;
+                } else if (clusterNum == 1 && i < normal) {
+                    c1N++;
+                } else if (clusterNum == 2 && i < normal) {
+                    c2N++;
+                } else if (clusterNum == 3 && i < normal) {
+                    c3N++;
+                } else if (clusterNum == 0 && i >= normal) {
+                    c0A++;
+                } else if (clusterNum == 1 && i >= normal) {
+                    c1A++;
+                } else if (clusterNum == 2 && i >= normal) {
+                    c2A++;
+                } else if (clusterNum == 3 && i >= normal) {
+                    c3A++;
+                }
+                i++;
+            }
+            System.out.println("Cluster 0: "+c0N+" normais/"+c0A+" anômalos");
+            System.out.println("Cluster 1: "+c1N+" normais/"+c1A+" anômalos");
+            System.out.println("Cluster 2: "+c2N+" normais/"+c2A+" anômalos");
+            System.out.println("Cluster 3: "+c3N+" normais/"+c3A+" anômalos");
+        }
+
+        // Desconhecido
+        if (false) {
+            for (int i = 0; i < allInstances.length; i++) {
+                long timeBegin = System.nanoTime();
+                int clusterNum = kmeans.clusterInstance(allInstances[1].instance(i));
+                long timeEnd = System.nanoTime();
+                timeTotal = timeTotal + (timeEnd - timeBegin);
+                if (i < firstNormals) { // é pra ser normal
+                    if (clusterNum == 0 || clusterNum == 0 || clusterNum == 0) { // Clusters normais
+                        VN = VN + 1;
+                    } else { // clusters anômalos
+                        FP = FP + 1;
+                    }
+                } else { // é pra ser anomalia
+                    if (clusterNum == 0 || clusterNum == 0 || clusterNum == 0) { // Clusters normais
+                        FN = FN + 1;
+                    } else { // clusters anômalos
+                        VP = VP + 1;
+                    }
+                }
+
+            }
+        }
+
+        System.out.println(
+                "VP: " + VP + ", VN: " + VN + ", FP: " + FP + ", FN: " + FN);
 
     }
 
-    public static void testeComClustering(SimpleKMeans kmeans, Instances instancias) throws Exception {
+    public static Resultado testeComClustering(SimpleKMeans kmeans, Instances instancias, int K, boolean printConflicts) throws Exception {
         Resultado finalResult = new Resultado("FinalResult", 0, 0, 0, 0);
 
+        Resultado[][] resultadosPorCluster = new Resultado[K][Parameters.CLASSIFIERS_FOREACH.length];
+
         /* Prepare Header Conflicting Results */
-        System.out.print("Instância,Cluster,Classe,");
+        if (printConflicts) {
+            System.out.print("Instância,Cluster,Classe,");
+        }
+
         for (ClassifierExtended conflicting : Parameters.CLASSIFIERS_FOREACH) {
             if (conflicting.equals(Parameters.CLASSIFIERS_FOREACH[Parameters.CLASSIFIERS_FOREACH.length - 1])) {
                 System.out.print(conflicting.getClassifierName());
@@ -57,11 +131,22 @@ public class BemSimples {
             Instance testando = instancias.instance(i);
 
             /* Prepare Conflicting Results */
-            Instance tempInstance = new Instance(instancias.instance(i));
+//            Instance tempInstance = new Instance(instancias.instance(i));
 //            tempInstance.isMissing(tempInstance.numAttributes() - 1);
-
+//            System.out.println("tempInstance: " + tempInstance);
+//            int clusterNum = kmeans.clusterInstance(tempInstance);
+            Instance tempInstance = new Instance(instancias.instance(i));
+            int deleteClassIndex = tempInstance.numAttributes() - 1;
+            tempInstance.deleteAttributeAt(deleteClassIndex);
             int clusterNum = kmeans.clusterInstance(tempInstance);
-//            System.out.println("Cluster:" + clusterNum + "tempInstance: " + tempInstance);
+
+//            if (clusterNum != 7) {
+//                throw new NullPointerException("RAPAIZZ, CLUSTER = "+clusterNum);
+//                break;
+//            }
+//            System.out.println("Cluster:" + clusterNum + "tempInstance: " + tempInstance);  
+
+            /* Prepare Conflicting Results */
             outputConflitos = outputConflitos + i + "," + clusterNum + "," + testando.classValue() + ",";
 
             ArrayList<ClassifierExtended> errados = new ArrayList();
@@ -72,8 +157,20 @@ public class BemSimples {
                 tempClassifier.setTempDecision(res1);
                 if (res1 != testando.classValue()) {
                     errados.add(tempClassifier);
+                    /* Preciso incrementar algo falso */
+                    if (testando.classValue() == 0) {
+                        finalResult.setFP(finalResult.getFP() + 1);
+                    } else {
+                        finalResult.setFN(finalResult.getFN() + 1);
+                    }
                 } else {
                     certos.add(tempClassifier);
+                    /* Preciso incrementar algo verdadeiro */
+                    if (testando.classValue() == 1) {
+                        finalResult.setVP(finalResult.getVP() + 1);
+                    } else {
+                        finalResult.setVN(finalResult.getVN() + 1);
+                    }
                 }
 
                 /* Prepare Conflicting Results */
@@ -86,23 +183,31 @@ public class BemSimples {
 
             boolean existemErros = (certos.size() < Parameters.CLASSIFIERS_FOREACH.length);
             boolean existemAcertos = (errados.size() < Parameters.CLASSIFIERS_FOREACH.length);
-            if (existemAcertos && existemErros) {
-                System.out.println(outputConflitos);
+            boolean exibirApenasConflitos = false;
+            if (printConflicts) {
+                if (exibirApenasConflitos) {
+                    if (existemAcertos && existemErros) {
+                        System.out.println(outputConflitos);
 //                System.out.println("Total: " + Parameters.CLASSIFIERS_FOREACH.length + ", Certos: " + certos.size() + "/" + Parameters.CLASSIFIERS_FOREACH.length + ", Errados: " + errados.size());
-                if (debug) {
-                    for (ClassifierExtended conflicting : certos) {
-                        System.out.println(conflicting.getClassifierName() + " [CERTO] = " + conflicting.getTempDecision());
+                        if (debug) {
+                            for (ClassifierExtended conflicting : certos) {
+                                System.out.println(conflicting.getClassifierName() + " [CERTO] = " + conflicting.getTempDecision());
+                            }
+                        }
+                        if (debug) {
+                            for (ClassifierExtended conflicting : errados) {
+                                System.out.println(conflicting.getClassifierName() + " [ERRADO] = " + conflicting.getTempDecision());
+                            }
+                        }
                     }
-                }
-                if (debug) {
-                    for (ClassifierExtended conflicting : errados) {
-                        System.out.println(conflicting.getClassifierName() + " [ERRADO] = " + conflicting.getTempDecision());
-                    }
+                } else {
+                    System.out.println(outputConflitos);
                 }
             }
 
         }
-
+        finalResult.recalcular();
+        return finalResult;
     }
 
     public static SimpleKMeans avaliacaoComClustering(int k, Instances treino, Instances avaliacao, Instances avaliacaoLimpa) throws Exception {
@@ -118,7 +223,7 @@ public class BemSimples {
             int numCluster = 0;
 
             for (int i = 0; i < k; i++) {
-                clustersResults[i] = new Resultado(CLASSIFIERS_FOREACH.getClassifierName() + " - Cluster: " + String.valueOf(numCluster), 0, 0, 0, 0);
+                clustersResults[i] = new Resultado("[cluster:" + String.valueOf(numCluster) + "];" + CLASSIFIERS_FOREACH.getClassifierName(), 0, 0, 0, 0);
                 numCluster++;
             }
 
@@ -156,14 +261,21 @@ public class BemSimples {
 
     }
 
-    public static void semClustering() throws Exception {
+    public static void semClustering(Instances instances) throws Exception {
         /* SEM CLUSTERING */
         if (true) {
             for (ClassifierExtended CLASSIFIERS_FOREACH : Parameters.CLASSIFIERS_FOREACH) {
                 selectedClassifier = CLASSIFIERS_FOREACH.getClassifier();
-                Resultado rs = avaliaEssaGalera(CLASSIFIERS_FOREACH.getClassifierName(), allInstances[0], allInstances[2]);
+                Resultado rs = avaliaEssaGalera(CLASSIFIERS_FOREACH.getClassifierName(), allInstances[0], instances);
 //            System.out.println(String.valueOf(rs.getCx() + " => " + " | Acurácia: " + rs.getAcuracia() + "Alarme Falso: " + rs.getTaxaAlarmeFalsos() + "Detecção: " + rs.getTaxaDeteccao() + "VP: " + rs.getVP() + ", VN: " + rs.getVN() + ", FN: " + rs.getFN() + ", FP: " + rs.getFP()));
-                System.out.println(String.valueOf(rs.getCx() + ";" + String.valueOf(rs.getAcuracia()).replace(".", ",") + "%" + ";" + String.valueOf(rs.getTaxaAlarmeFalsos()).replace(".", ",") + "%" + ";" + String.valueOf(rs.getTaxaDeteccao()).replace(".", ",") + "%" + ";" + rs.getVP() + ";" + rs.getVN() + ";" + rs.getFN() + ";" + rs.getFP()));
+//                System.out.println(
+                //"[" + rs.getTime() + "ns (" + ((rs.getVN() + rs.getVP() + rs.getFN() + rs.getFP())/rs.getTime()) + "samp/ns)"+
+//                        "(" + (rs.getTime()/(rs.getVN() + rs.getVP() + rs.getFN() + rs.getFP())) + "ns/samp)"
+                //+ "]"
+//                        String.valueOf(rs.getCx() + ";" + String.valueOf(rs.getAcuracia()).replace(".", ",") + "%" + ";" + String.valueOf(rs.getTaxaAlarmeFalsos()).replace(".", ",") + "%" + ";" + String.valueOf(rs.getTaxaDeteccao()).replace(".", ",") + "%" + ";" + rs.getVP() + ";" + rs.getVN() + ";" + rs.getFN() + ";" + rs.getFP())
+//                );
+                System.out.println(rs.getCx() + ": " + (rs.getTime() / (rs.getVN() + rs.getVP() + rs.getFN() + rs.getFP()) / 1000) + "ms");
+
             }
         }
 
@@ -183,9 +295,13 @@ public class BemSimples {
 
         // Validação de ataques
 //        System.out.println(" *** Ataques *** ");
+        long timeDiff = 0;
         for (int i = 0; i < teste.numInstances() - 1; i++) {
             Instance testando = teste.instance(i);
+            long time = System.nanoTime();
             double res1 = selectedClassifier.classifyInstance(testando);
+            long timeEnd = System.nanoTime();
+            timeDiff = timeDiff + timeEnd - time;
             if (res1 == testando.classValue() && res1 < 1) {
                 VN = VN + 1;
             } else if (res1 != testando.classValue() && res1 < 1) {
@@ -211,7 +327,7 @@ public class BemSimples {
                 System.out.println("Divisão por zero ((" + VP + " + " + VN + ") * 100) / (" + VP + " + " + VN + "+ " + FP + "+" + FN + "))");
             }
         }
-        Resultado r = new Resultado(descricao, VP, FN, VN, FP, acuracia, txDec, txAFal);
+        Resultado r = new Resultado(descricao, VP, FN, VN, FP, acuracia, txDec, txAFal, timeDiff);
         return r;
 
     }

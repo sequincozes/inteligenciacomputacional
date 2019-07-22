@@ -55,6 +55,18 @@ public class Resultado {
         this.taxaAlarmeFalsos = txAFal;
     }
 
+    public Resultado(String descricao, float VP, float FN, float VN, float FP, double acuracia, double txDet, double txAFal, long time) {
+        this.Cx = descricao;
+        this.VP = VP;
+        this.FN = FN;
+        this.VN = VN;
+        this.FP = FP;
+        this.acuracia = acuracia;
+        this.taxaDeteccao = txDet;
+        this.taxaAlarmeFalsos = txAFal;
+        this.Time = time;
+    }
+
     public Resultado(String descricao, float VP, float FN, float VN, float FP) {
         this.Cx = descricao;
         this.VP = VP;
