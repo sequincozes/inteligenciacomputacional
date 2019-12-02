@@ -38,6 +38,14 @@ public class Parameters {
     public static final String FILE_EVALUATION = DIRETORIO + DETECTOR_SELECIONADO + SEPARATOR + "10_evaluation_files" + SEPARATOR + "compilado_evaluation.csv"; //ataque_binario_10k
     public static final String FILE_TEST = DIRETORIO + DETECTOR_SELECIONADO + SEPARATOR + "80_test_files" + SEPARATOR + "compilado_test_160.csv"; //ataque_binario_10k
 
+    public static final String FILE_TRAIN_D1 = DIRETORIO + DETECTOR_1 + SEPARATOR + "10_train_files" + SEPARATOR + "compilado_train.csv"; //treino_binario_1000_1000
+    public static final String FILE_EVALUATION_D1 = DIRETORIO + DETECTOR_1 + SEPARATOR + "10_evaluation_files" + SEPARATOR + "compilado_evaluation.csv"; //ataque_binario_10k
+    public static final String FILE_TEST_D1 = DIRETORIO + DETECTOR_1 + SEPARATOR + "80_test_files" + SEPARATOR + "compilado_test_160.csv"; //ataque_binario_10k
+    
+    public static final String FILE_TRAIN_D2 = DIRETORIO + DETECTOR_2 + SEPARATOR + "10_train_files" + SEPARATOR + "compilado_train.csv"; //treino_binario_1000_1000
+    public static final String FILE_EVALUATION_D2 = DIRETORIO + DETECTOR_2 + SEPARATOR + "10_evaluation_files" + SEPARATOR + "compilado_evaluation.csv"; //ataque_binario_10k
+    public static final String FILE_TEST_D2 = DIRETORIO + DETECTOR_2 + SEPARATOR + "80_test_files" + SEPARATOR + "compilado_test_160.csv"; //ataque_binario_10k
+    
     public static final ClassifierExtended RANDOM_TREE = new ClassifierExtended(true, new RandomTree(), "RandomTree");
     public static final ClassifierExtended RANDOM_FOREST = new ClassifierExtended(true, new RandomForest(), "RandomForest");
     public static final ClassifierExtended NAIVE_BAYES = new ClassifierExtended(true, new NaiveBayes(), "NaiveBayes");

@@ -5,6 +5,7 @@
  */
 package RedeDeConselhos;
 
+import static RedeDeConselhos.BemSimplesJournal.allInstances;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -51,6 +52,27 @@ public class Util {
             }
         }
         return instances;
+    }
+
+    public static Instances loadSingleInstances(boolean filter, boolean randomize, String file) throws Exception {
+        Instances singleLoad = new Instances(Util.readDataFile(file));
+        if (filter && Parameters.FEATURE_SELECTION.length > 0) {
+            singleLoad = Util.applyFilterKeep(singleLoad);
+        }
+        if (randomize) {
+            singleLoad.randomize(new java.util.Random());
+        }
+        singleLoad.setClassIndex(singleLoad.numAttributes() - 1);
+        return singleLoad;
+    }
+
+    public static Instances[] splitInstance(Instances fullInstanceSet, double fator) {
+        int trainSize = (int) Math.round(fullInstanceSet.numInstances() * fator / 100);
+        int testSize = fullInstanceSet.numInstances() - trainSize;
+        Instances train = new Instances(fullInstanceSet, 0, trainSize);
+        Instances test = new Instances(fullInstanceSet, trainSize, testSize);
+        Instances splitted[] = {train, test};
+        return splitted;
     }
 
     public static Instances[] loadAndFilter(boolean printSelection, boolean anomaly) throws Exception {

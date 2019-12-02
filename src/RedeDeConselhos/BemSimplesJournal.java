@@ -13,98 +13,110 @@ import weka.clusterers.SimpleKMeans;
 import weka.core.Instance;
 import weka.core.Instances;
 
+/*
+
+Treina D1;
+Treina D2;
+
+Avalia D1:
+ for clusters    
+    ClusterN;
+        - Classificador 1 = acuracia
+        - Classificador 2 = acuracia
+        - Classificador 3 = acuracia 
+        - Classificador 4 = acuracia
+        - Classificador 5 = acuracia
+  
+
+Testa D1:
+    for instancias:
+        cluster = Kmeans.cluster
+            clusterX.classificadorY() = acuracia, 0 // Normal
+            clusterX.classificadorY() = acuracia, 1 // Ataque
+            clusterX.classificadorY() = acuracia, 0 // Normal
+            armazena: instanciaID|D1|clusterX|classificadorY|acuracia|resultado
+
+
+*/
+
+
 /**
  *
  * @author silvio
  */
-public class BemSimples {
+public class BemSimplesJournal {
 
     static Instances[] allInstances;
-    static Classifier selectedClassifier = null;// Parameters.NAIVE_BAYES.getClassifier();
+    static Classifier selectedClassifier = Parameters.CLASSIFIERS_FOREACH[0].getClassifier();// Parameters.NAIVE_BAYES.getClassifier();
     static boolean rawOutput = false;
     static boolean debug = false;
+    static SimpleKMeans kmeans;
 
     public static void main(String[] args) throws Exception {
-        allInstances = Util.loadAndFilter(false, true);
+//        allInstances = Util.loadAndFilter(false, false);
+        Instances fullTrainD1 = Util.loadSingleInstances(true, true, Parameters.FILE_TRAIN_D1);
+        Instances fullTrainD2 = Util.loadSingleInstances(true, true, Parameters.FILE_TRAIN_D2);
+
+        Instances[] metadeTrain = Util.splitInstance(fullTrainD2, 1); // Proporçao de treinamento
+        Instances[] treinoEval = Util.splitInstance(metadeTrain[0], 50); //50% ev e 50% tra
+        allInstances = new Instances[3];
+        allInstances[0] = treinoEval[0]; // train
+        allInstances[1] = treinoEval[1]; // evaluation
+
+        Instances fullTest = Util.loadSingleInstances(true, true, Parameters.FILE_TEST);
+//        Instances[] metadesTest = Util.splitInstance(fullTrain, 50); //Porcentagem da base de testes
+        allInstances[2] = fullTest;// metadesTest[0]; // teste
+
+        /* AVALIAÇÃO */
+        int K = 4;
+//        System.out.println("K=" + K);
+//        kmeans = avaliacaoComClustering(K, allInstances[0], allInstances[1], allInstances[3]);
+        for (ClassifierExtended CLASSIFIERS_FOREACH : Parameters.CLASSIFIERS_FOREACH) {
+            selectedClassifier = CLASSIFIERS_FOREACH.getClassifier();
+            System.out.println("-------------");
+            System.out.println("Accurácia: " + CLASSIFIERS_FOREACH.getClassifierName() + ": " + testaEssaGaleraRetroalimentando("All", 0, 100000));
+            System.out.println("Accurácia: " + CLASSIFIERS_FOREACH.getClassifierName() + ": " + testaEssaGaleraRetroalimentando("All", 100000, 200000));
+            System.out.println("Accurácia: " + CLASSIFIERS_FOREACH.getClassifierName() + ": " + testaEssaGaleraRetroalimentando("All", 200000, 300000));
+            System.out.println("Accurácia: " + CLASSIFIERS_FOREACH.getClassifierName() + ": " + testaEssaGaleraRetroalimentando("All", 300000, 400000));
+            System.out.println("Accurácia: " + CLASSIFIERS_FOREACH.getClassifierName() + ": " + testaEssaGaleraRetroalimentando("All", 400000, 500000));
+        }
 //        int K = 5; // Conselheiro (Detector 2)
 //        int K = 4; // Detector 
 //        System.out.println("K=" + K);
 //        SimpleKMeans kmeans = avaliacaoComClustering(K, allInstances[0], allInstances[1], allInstances[3]);
 //        Resultado rs = testeComClustering(kmeans, allInstances[2], K, true);;
 //        System.out.println(String.valueOf(rs.getCx() + ";" + String.valueOf(rs.getAcuracia()).replace(".", ",") + "%" + ";" + String.valueOf(rs.getTaxaAlarmeFalsos()).replace(".", ",") + "%" + ";" + String.valueOf(rs.getTaxaDeteccao()).replace(".", ",") + "%" + ";" + rs.getVP() + ";" + rs.getVN() + ";" + rs.getFN() + ";" + rs.getFP()));;
-
 //        semClustering(allInstances[1]);
 //        BemSimples.anomalyTests(331541);
     }
 
-    public static void anomalyTests(int firstNormals) throws Exception {
-        SimpleKMeans kmeans = new SimpleKMeans();
-        kmeans.setPreserveInstancesOrder(true);
-        kmeans.setNumClusters(4);
-        kmeans.buildClusterer(allInstances[0]);
-        int VP = 0, VN = 0, FP = 0, FN = 0;
-        long timeTotal = 0;
+    //Instances[]{trainInstances, testAttackInstances, testNormalInstances};
+    public static double testaEssaGaleraRetroalimentando(String descricao, int begin, int end) throws Exception {
+        selectedClassifier.buildClassifier(allInstances[0]);
+        System.out.println("Train: " + allInstances[0].numInstances());
+        System.out.println("Eval: " + allInstances[1].numInstances());
+        System.out.println("Test: " + allInstances[2].numInstances());
+        // Resultados
+        double acuracia = 0;
+        int acertos = 0;
 
-        // Modelo
-        if (true) {
-            int[] assignments = kmeans.getAssignments();
-            int i = 0;
-            int normal = 41434;
-            int c0N = 0, c1N = 0, c2N = 0, c3N = 0;
-            int c0A = 0, c1A = 0, c2A = 0, c3A = 0;
-            for (int clusterNum : assignments) {
-//                System.out.printf("Instance %d -> Cluster %d \n", i, clusterNum);
-                if (clusterNum == 0 && i < normal) {
-                    c0N++;
-                } else if (clusterNum == 1 && i < normal) {
-                    c1N++;
-                } else if (clusterNum == 2 && i < normal) {
-                    c2N++;
-                } else if (clusterNum == 3 && i < normal) {
-                    c3N++;
-                } else if (clusterNum == 0 && i >= normal) {
-                    c0A++;
-                } else if (clusterNum == 1 && i >= normal) {
-                    c1A++;
-                } else if (clusterNum == 2 && i >= normal) {
-                    c2A++;
-                } else if (clusterNum == 3 && i >= normal) {
-                    c3A++;
-                }
-                i++;
+        // Validação de ataques + Normais
+        for (int i = begin; i < end; i++) {
+            Instance testando = allInstances[2].instance(i);
+            double res1 = selectedClassifier.classifyInstance(testando);
+            if (res1 == testando.classValue()) {
+                acertos = acertos + 1;
             }
-            System.out.println("Cluster 0: "+c0N+" normais/"+c0A+" anômalos");
-            System.out.println("Cluster 1: "+c1N+" normais/"+c1A+" anômalos");
-            System.out.println("Cluster 2: "+c2N+" normais/"+c2A+" anômalos");
-            System.out.println("Cluster 3: "+c3N+" normais/"+c3A+" anômalos");
+            testando.setClassValue(res1);
+            allInstances[0].add(testando);
         }
 
-        // Desconhecido
-        if (false) {
-            for (int i = 0; i < allInstances.length; i++) {
-                long timeBegin = System.nanoTime();
-                int clusterNum = kmeans.clusterInstance(allInstances[1].instance(i));
-                long timeEnd = System.nanoTime();
-                timeTotal = timeTotal + (timeEnd - timeBegin);
-                if (i < firstNormals) { // é pra ser normal
-                    if (clusterNum == 0 || clusterNum == 0 || clusterNum == 0) { // Clusters normais
-                        VN = VN + 1;
-                    } else { // clusters anômalos
-                        FP = FP + 1;
-                    }
-                } else { // é pra ser anomalia
-                    if (clusterNum == 0 || clusterNum == 0 || clusterNum == 0) { // Clusters normais
-                        FN = FN + 1;
-                    } else { // clusters anômalos
-                        VP = VP + 1;
-                    }
-                }
-
-            }
+        try {
+            acuracia = Float.valueOf((acertos * 100) / Float.valueOf((end - begin)));
+        } catch (java.lang.ArithmeticException e) {
+            System.out.println("Divisão por zero ((" + acertos + ") * 100) / (" + (end - begin) + "))");
         }
-
-        System.out.println(
-                "VP: " + VP + ", VN: " + VN + ", FP: " + FP + ", FN: " + FN);
+        return acuracia;
 
     }
 
@@ -366,63 +378,6 @@ public class BemSimples {
             } else {
                 FP = FP + 1;
             }
-        }
-
-        try {
-
-            acuracia = Float.valueOf(((VP + VN)) * 100) / Float.valueOf((VP + VN + FP + FN));
-            txDec = Float.valueOf((VP * 100)) / Float.valueOf((VP + FN));  // Sensitividade ou Taxa de Detecção
-            txAFal = Float.valueOf((FP * 100)) / Float.valueOf((VN + FP)); // Especificade ou Taxa de Alarmes Falsos    
-        } catch (java.lang.ArithmeticException e) {
-            System.out.println("Divisão por zero ((" + VP + " + " + VN + ") * 100) / (" + VP + " + " + VN + "+ " + FP + "+" + FN + "))");
-        }
-        Resultado r = new Resultado(descricao, VP, FN, VN, FP, acuracia, txDec, txAFal);
-        return r;
-
-    }
-
-    //Instances[]{trainInstances, testAttackInstances, testNormalInstances};
-    public static Resultado testaEssaGaleraRetroalimentando(String descricao, int begin, int end) throws Exception {
-        selectedClassifier.buildClassifier(allInstances[0]);
-
-        // Resultados
-        double acuracia = 0;
-        double txDec = 0;
-        double txAFal = 0;
-        int VP = 0;
-        int VN = 0;
-        int FP = 0;
-        int FN = 0;
-
-        // Validação de ataques
-//        System.out.println(" *** Ataques *** ");
-        for (int i = begin; i < end; i++) {
-            Instance testando = allInstances[1].instance(i);
-            double res1 = selectedClassifier.classifyInstance(testando);
-            if (res1 == testando.classValue()) {
-                VP = VP + 1;
-            } else {
-                FN = FN + 1;
-            }
-            testando.setClassValue(res1);
-            allInstances[0].add(testando);
-        }
-
-        // Validação de normais
-//        System.out.println(" *** Normais *** ");
-        for (int i = begin; i < end; i++) {
-            Instance testando2 = allInstances[2].instance(i);
-            double res2 = selectedClassifier.classifyInstance(testando2);
-            if (res2 == testando2.classValue()) {
-                VN = VN + 1;
-            } else {
-                FP = FP + 1;
-            }
-
-            //retroalimentação
-            testando2.setClassValue(res2);
-            allInstances[0].add(testando2);
-
         }
 
         try {
